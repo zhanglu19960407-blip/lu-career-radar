@@ -115,7 +115,8 @@ export function dbToClient(j) {
     employmentType: j.employment_type || 'Full-time',
     isMbaProgram: Boolean(j.is_mba_program),
     postedAt: j.posted_at || null,
-    createdAt: j.created_at
+    createdAt: j.created_at,
+    updatedAt: j.updated_at
   };
 }
 
