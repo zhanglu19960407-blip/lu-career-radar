@@ -200,6 +200,11 @@ $('#accessTokenInput').value=accessToken;
 $('#saveTokenBtn').addEventListener('click',()=>{accessToken=$('#accessTokenInput').value.trim();localStorage.setItem('careerRadarAccessToken',accessToken);updateConnectionStatus('访问令牌已保存到当前浏览器。');loadCloudJobs();});
 $('#testConnectionBtn').addEventListener('click',async()=>{try{const d=await apiFetch('/api/health');cloudConnected=true;updateConnectionStatus(`连接成功。Supabase：${d.supabaseConfigured?'就绪':'缺失'} · OpenAI：${d.openaiConfigured?'就绪':'缺失'} · 模型：${d.model}`);}catch(e){cloudConnected=false;updateConnectionStatus(`连接失败：${e.message}`);}});
 
+$('.filter-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+  const checked=btn.dataset.check==='true';
+  $('.'+btn.dataset.target).forEach(el=>el.checked=checked);
+  render();
+}));
 refreshLocationOptions();
 $('#calcCity').value='London';$('#calcCurrency').value='GBP';renderSettings();refreshDynamicFilters();
 render();
