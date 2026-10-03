@@ -31,5 +31,15 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true });
     }
     return json(res, 405, { error: 'Method not allowed' });
-  } catch (e) { return json(res, 500, { error: e.message }); }
+  } catch (e) {
+    console.error('Career Radar /api/jobs failure', {
+      method: req.method,
+      message: e?.message || String(e),
+      supabaseUrlConfigured: Boolean(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL),
+      supabaseSecretConfigured: Boolean(process.env.SUPABASE_SECRET_KEY),
+      serviceRoleConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+      anonConfigured: Boolean(process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+    });
+    return json(res, 500, { error: e?.message || 'Cloud database request failed' });
+  }
 }
