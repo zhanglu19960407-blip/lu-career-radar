@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       const knownWebUrls = new Set(existingBeforeWeb.map(x=>x.url).filter(Boolean));
       let batchSaved = 0;
       const webJobs = await discoverOfficialJobs({
-        maxCompanies: Number(req.body?.maxWebCompanies || 100),
+        maxCompanies: Number(req.body?.maxWebCompanies || 150),
         onBatch: async ({batch,totalBatches,jobs}) => {
           const normalized = jobs.map(x=>({ ...x, ...locationMeta(x.location||''), source:x.source||'Official Web Discovery' }))
             .filter(x=>isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
