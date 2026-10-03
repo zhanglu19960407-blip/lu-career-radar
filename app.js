@@ -142,7 +142,7 @@ function render(){
     <div class="money-strip"><div><span>市场薪酬参考</span><b>${(j.salaryMin||j.salaryMax) ? money(j.salaryMin,j.currency)+'–'+money(j.salaryMax,j.currency)+' / 年' : '待估算'}</b></div><div><span>预计税后人民币</span><b>${(j.salaryMin||j.salaryMax) ? rmb(nr)+' / 年' : '待估算'}</b></div></div>
     <div class="job-copy"><b>匹配原因：</b> ${j.whyFit||'—'}<br><b>主要风险：</b> ${j.risk||'—'}</div>
     ${(j.jobDescriptionZh||j.jobDescription) ? `<details class="job-description"><summary>查看职位描述</summary><div class="job-copy" style="white-space:pre-wrap;margin-top:10px">${escapeHtml(j.jobDescriptionZh||j.jobDescription)}</div></details>` : ''}
-    <div class="job-footer"><div class="recommendation ${cls}">${rec}</div><div class="job-actions"><button class="mini-btn" onclick='moveStatus(${JSON.stringify(String(j.id))})'>推进阶段</button>${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">打开职位</a>`:''}</div></div>
+    <div class="job-footer"><div class="recommendation ${cls}">${rec}</div><div class="job-actions"><button class="mini-btn" onclick='moveStatus(${JSON.stringify(String(j.id))})'>推进阶段</button>${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">申请职位</a>`:''}</div></div>
   </article>`};
   const grouped=trackOrder.map(track=>{
     const trackJobs=list.filter(j=>j.track===track); if(!trackJobs.length)return '';
