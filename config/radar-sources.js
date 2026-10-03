@@ -37,7 +37,7 @@ export const CFO_TITLE_TERMS = [
   'strategic finance manager','senior strategic finance manager',
   'commercial finance manager','senior commercial finance manager',
   'finance director','associate finance director',
-  'senior financial analyst','fp&a manager','senior fp&a manager'
+  'senior financial analyst','fp&a manager','senior fp&a manager','mba summer intern','mba intern','mba internship','mba summer associate'
 ];
 
 export const PE_TITLE_TERMS = [
