@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,27 +18,27 @@
         <div class="brand-mark">LR</div>
         <div>
           <div class="brand-title">Lu Career Radar</div>
-          <div class="brand-sub">以经营者为导向的职业情报 · Operator-first job intelligence</div>
+          <div class="brand-sub">以经营者为导向的职业情报</div>
         </div>
       </div>
 
       <nav class="nav-section">
-        <button class="nav-item active" data-view="dashboard">职业雷达 · Dashboard</button>
-        <button class="nav-item" data-view="pipeline">申请进度 · Application Pipeline</button>
-        <button class="nav-item" data-view="compensation">薪酬实验室 · Compensation Lab</button>
-        <button class="nav-item" data-view="automation">自动化设置 · Automation Setup</button>
-        <button class="nav-item" data-view="settings">税务与汇率 · Tax & FX Settings</button>
+        <button class="nav-item active" data-view="dashboard">职业雷达</button>
+        <button class="nav-item" data-view="pipeline">申请进度</button>
+        <button class="nav-item" data-view="compensation">薪酬实验室</button>
+        <button class="nav-item" data-view="automation">自动化设置</button>
+        <button class="nav-item" data-view="settings">税务与汇率</button>
       </nav>
 
       <div class="sidebar-block">
-        <div class="sidebar-label">职业路线 · Career Tracks</div>
+        <div class="sidebar-label">职业路线</div>
         <label><input type="checkbox" class="track-filter" value="CFO" checked> CFO / Strategic Finance</label>
         <label><input type="checkbox" class="track-filter" value="CEO/GM" checked> CEO / GM / P&L</label>
         <label><input type="checkbox" class="track-filter" value="Operating Partner" checked> Operating Partner</label>
       </div>
 
       <div class="sidebar-block">
-        <div class="sidebar-label">目标地区 · Geographies</div>
+        <div class="sidebar-label">目标地区</div>
         <label><input type="checkbox" class="geo-filter" value="United Kingdom" checked> United Kingdom</label>
         <label><input type="checkbox" class="geo-filter" value="Europe" checked> Europe</label>
         <label><input type="checkbox" class="geo-filter" value="United States" checked> United States</label>
@@ -54,79 +54,79 @@
     <main class="main">
       <header class="topbar">
         <div>
-          <div class="eyebrow">职业发展情报 · Career Intelligence Dashboard</div>
-          <h1>比较职业上升空间与实际税后收入 · Compare career upside and real take-home pay.</h1>
+          <div class="eyebrow">职业发展情报</div>
+          <h1>比较职业上升空间与实际税后收入</h1>
         </div>
         <div class="top-actions">
-          <button class="secondary-btn" id="exportBtn">导出数据 · Export</button>
-          <button class="secondary-btn" id="importBtn">导入职位 · Import</button>
-          <button class="primary-btn" id="addJobBtn">+ 添加职位 · Add job</button>
-          <input type="file" id="fileInput" accept="application/json" hidden>
+          <button class="secondary-btn" id="exportBtn">导出数据</button>
+          <button class="secondary-btn" id="importBtn">导入职位</button>
+          <button class="primary-btn" id="addJobBtn">+ 添加职位</button>
+          <input type="file" id="file输入" accept="application/json" hidden>
         </div>
       </header>
 
       <section id="dashboardView" class="view active-view">
         <div class="stats-grid">
-          <div class="stat-card"><span>可见职位 · Visible jobs</span><strong id="visibleCount">0</strong><small>Across selected regions & tracks</small></div>
-          <div class="stat-card"><span>高匹配职位 · Strong fits</span><strong id="strongFitCount">0</strong><small>匹配度 · Fit score ≥ 85</small></div>
-          <div class="stat-card"><span>最高税后收入 · Best net pay</span><strong id="bestNetPay">—</strong><small>Estimated annual take-home RMB</small></div>
-          <div class="stat-card"><span>职业瓶颈预警 · Dead-end alerts</span><strong id="deadEndCount">0</strong><small>Risk score ≥ 4/5</small></div>
+          <div class="stat-card"><span>可见职位</span><strong id="visibleCount">0</strong><small>所选地区与职业路线</small></div>
+          <div class="stat-card"><span>高匹配职位</span><strong id="strongFitCount">0</strong><small>匹配度 ≥ 85</small></div>
+          <div class="stat-card"><span>最高税后收入</span><strong id="bestNetPay">—</strong><small>预计年度税后人民币</small></div>
+          <div class="stat-card"><span>职业瓶颈预警</span><strong id="deadEndCount">0</strong><small>风险评分 ≥ 4/5</small></div>
         </div>
 
         <div class="controls-card">
-          <div class="search-wrap"><input id="searchInput" type="text" placeholder="搜索公司、职位、行业或关键词 · Search company, title, industry, or keyword..." /></div>
-          <select id="locationSelect"><option value="All">全部地点 · All locations</option></select>
+          <div class="search-wrap"><input id="search输入" type="text" placeholder="搜索公司、职位、行业或关键词..." /></div>
+          <select id="locationSelect"><option value="All">全部地点</option></select>
           <select id="sortSelect">
-            <option value="fit">排序：匹配度 · 匹配度 · Fit score</option>
-            <option value="netRmb">排序：税后人民币 · Net RMB</option>
-            <option value="career">排序：职业上升空间 · Career upside</option>
-            <option value="pl">排序：P&L 参与度 · P&L exposure</option>
-            <option value="gross">排序：税前薪酬 · Gross salary</option>
+            <option value="fit">排序：匹配度</option>
+            <option value="netRmb">排序：税后人民币</option>
+            <option value="career">排序：职业上升空间</option>
+            <option value="pl">排序：P&L 参与度</option>
+            <option value="gross">排序：税前薪酬</option>
           </select>
         </div>
 
         <div class="section-heading">
-          <div><div class="eyebrow">机会列表 · Opportunity Feed</div><h2>优先职位 · Prioritised jobs</h2></div>
-          <div class="legend"><span class="dot green"></span> 申请 · Apply <span class="dot amber"></span> 挑战 · Stretch <span class="dot red"></span> 跳过 · Skip</div>
+          <div><div class="eyebrow">机会列表</div><h2>优先职位</h2></div>
+          <div class="legend"><span class="dot green"></span> 申请 <span class="dot amber"></span> 挑战 <span class="dot red"></span> 跳过</div>
         </div>
         <div id="jobGrid" class="job-grid"></div>
       </section>
 
       <section id="pipelineView" class="view">
-        <div class="section-heading"><div><div class="eyebrow">Pipeline</div><h2>你的申请流程 · Your application workflow</h2></div></div>
+        <div class="section-heading"><div><div class="eyebrow">申请流程</div><h2>你的申请流程</h2></div></div>
         <div class="pipeline-board" id="pipelineBoard"></div>
       </section>
 
       <section id="compensationView" class="view">
-        <div class="section-heading"><div><div class="eyebrow">薪酬实验室 · Compensation Lab</div><h2>将全球薪酬统一换算为税后人民币 · Normalise every offer into net RMB</h2></div></div>
+        <div class="section-heading"><div><div class="eyebrow">薪酬实验室</div><h2>将全球薪酬统一换算为税后人民币</h2></div></div>
         <div class="comp-grid">
           <div class="config-card">
-            <h3>快速计算器 · Quick calculator</h3>
+            <h3>快速计算器</h3>
             <div class="form-grid compact">
-              <label>城市 · City<select id="calcCity"></select></label>
-              <label>货币 · Currency<select id="calcCurrency"></select></label>
-              <label>Annual base salary<input id="calcSalary" type="number" value="100000" min="0"></label>
-              <label>Annual bonus<input id="calcBonus" type="number" value="0" min="0"></label>
+              <label>城市<select id="calcCity"></select></label>
+              <label>货币<select id="calcCurrency"></select></label>
+              <label>年度基本工资<input id="calcSalary" type="number" value="100000" min="0"></label>
+              <label>年度奖金<input id="calcBonus" type="number" value="0" min="0"></label>
             </div>
             <div class="result-panel" id="calcResult"></div>
-            <div class="note">Estimate only. Pension, equity, stock vesting, student loans, deductions, allowances, social-insurance caps and filing status can materially change take-home pay.</div>
+            <div class="note">仅供估算。养老金、股权、股票归属、学生贷款、扣除项、津贴、社保上限和报税身份等均可能显著影响实际税后收入。</div>
           </div>
           <div class="config-card">
-            <h3>比较逻辑 · Comparison logic</h3>
-            <div class="score-row"><span>Gross local compensation</span><b>Input</b></div>
-            <div class="score-row"><span>Estimated local tax / NI / social charges</span><b>Deduct</b></div>
-            <div class="score-row"><span>Estimated local net</span><b>Convert</b></div>
-            <div class="score-row"><span>RMB FX rate</span><b>Apply</b></div>
-            <div class="score-row"><span>Annual + monthly take-home RMB</span><b>Compare</b></div>
-            <div class="note">UK roles use a 2026/27 England income-tax + employee National Insurance formula. Other markets use editable effective-tax presets in Settings so assumptions are visible and controllable.</div>
+            <h3>比较逻辑</h3>
+            <div class="score-row"><span>当地税前总薪酬</span><b>输入</b></div>
+            <div class="score-row"><span>预计当地税费 / 国民保险 / 社保</span><b>扣除</b></div>
+            <div class="score-row"><span>预计当地税后收入</span><b>换算</b></div>
+            <div class="score-row"><span>人民币汇率</span><b>应用</b></div>
+            <div class="score-row"><span>年度 + 月度税后人民币</span><b>比较</b></div>
+            <div class="note">UK roles use a 2026/27 England income-tax + employee National Insurance formula. Other markets use editable effective-tax presets in 设置 so assumptions are visible and controllable.</div>
           </div>
         </div>
-        <div class="section-heading"><div><div class="eyebrow">Ranked by Take-home</div><h2>Cross-market compensation</h2></div></div>
-        <div class="table-wrap"><table id="compTable"><thead><tr><th>Role</th><th>Location</th><th>Gross midpoint</th><th>Est. net local</th><th>Est. net RMB / year</th><th>Est. net RMB / month</th><th>Tax model</th></tr></thead><tbody></tbody></table></div>
+        <div class="section-heading"><div><div class="eyebrow">按税后收入排序</div><h2>跨市场薪酬比较</h2></div></div>
+        <div class="table-wrap"><table id="compTable"><thead><tr><th>职位</th><th>地点</th><th>税前薪酬中位值</th><th>预计当地税后</th><th>预计税后人民币 / 年</th><th>预计税后人民币 / 月</th><th>税务模型</th></tr></thead><tbody></tbody></table></div>
       </section>
 
       <section id="automationView" class="view">
-        <div class="section-heading"><div><div class="eyebrow">Automation</div><h2>自动化系统架构 · Production system architecture</h2></div></div>
+        <div class="section-heading"><div><div class="eyebrow">自动化</div><h2>自动化系统架构</h2></div></div>
         <div class="automation-grid">
           <div class="flow-card">
             <div class="flow-step"><b>1. Discover</b><span>Clay / job APIs / target-company career pages</span></div>
@@ -142,68 +142,68 @@
             <div class="flow-step"><b>6. Review</b><span>This dashboard + daily shortlist digest</span></div>
           </div>
           <div class="config-card">
-            <h3>评分逻辑 · Scoring logic</h3>
-            <div class="score-row"><span>Career optionality</span><b>25%</b></div>
-            <div class="score-row"><span>P&L / commercial ownership</span><b>20%</b></div>
-            <div class="score-row"><span>Senior leadership exposure</span><b>15%</b></div>
-            <div class="score-row"><span>M&A / capital allocation</span><b>15%</b></div>
-            <div class="score-row"><span>Transformation / value creation</span><b>15%</b></div>
-            <div class="score-row"><span>Brand / platform quality</span><b>10%</b></div>
+            <h3>评分逻辑</h3>
+            <div class="score-row"><span>职业选择空间</span><b>25%</b></div>
+            <div class="score-row"><span>P&L / 商业经营权责</span><b>20%</b></div>
+            <div class="score-row"><span>高管层接触度</span><b>15%</b></div>
+            <div class="score-row"><span>M&A / 资本配置</span><b>15%</b></div>
+            <div class="score-row"><span>转型 / 价值创造</span><b>15%</b></div>
+            <div class="score-row"><span>品牌 / 平台质量</span><b>10%</b></div>
             <div class="note">Compensation is shown separately so a high-paying role does not automatically outrank a strategically better role.</div>
           </div>
         </div>
       </section>
 
       <section id="settingsView" class="view">
-        <div class="section-heading"><div><div class="eyebrow">Settings</div><h2>税务与汇率假设 · Tax & FX assumptions</h2></div><button class="secondary-btn" id="refreshFxBtn">刷新实时汇率 · Refresh live FX</button></div>
+        <div class="section-heading"><div><div class="eyebrow">设置</div><h2>税务与汇率假设</h2></div><button class="secondary-btn" id="refreshFxBtn">刷新实时汇率</button></div>
         <div class="settings-grid">
           <div class="config-card">
-            <h3>云端连接 · Cloud connection</h3>
-            <label>Access token<input id="accessTokenInput" type="password" placeholder="CAREER_RADAR_ACCESS_TOKEN"></label>
-            <div class="settings-actions"><button class="secondary-btn" id="testConnectionBtn" type="button">测试连接 · Test connection</button><button class="primary-btn" id="saveTokenBtn" type="button">保存 Token · Save token</button></div>
+            <h3>云端连接</h3>
+            <label>访问令牌<input id="accessToken输入" type="password" placeholder="CAREER_RADAR_ACCESS_TOKEN"></label>
+            <div class="settings-actions"><button class="secondary-btn" id="testConnectionBtn" type="button">测试连接</button><button class="primary-btn" id="saveTokenBtn" type="button">保存令牌</button></div>
             <div class="note" id="connectionStatus">Cloud mode is ready after you deploy and add the Vercel environment variables.</div>
           </div>
           <div class="config-card">
-            <h3>货币 → 人民币 · Currency → RMB</h3>
-            <div id="fxSettings"></div>
-            <div class="note" id="fxStatus">Fallback rates are editable. “刷新实时汇率 · Refresh live FX” attempts to pull current market rates from a public FX endpoint; if unavailable, your saved rates remain unchanged.</div>
+            <h3>货币 → 人民币</h3>
+            <div id="fx设置"></div>
+            <div class="note" id="fxStatus">Fallback rates are editable. “刷新实时汇率” attempts to pull current market rates from a public FX endpoint; if unavailable, your saved rates remain unchanged.</div>
           </div>
           <div class="config-card">
-            <h3>有效税率预设 · Effective tax presets</h3>
-            <div id="taxSettings"></div>
+            <h3>有效税率预设</h3>
+            <div id="tax设置"></div>
             <div class="note">These presets are intentionally editable. For England, the dashboard ignores the preset and uses the built-in 2026/27 UK formula. For all other markets, the preset is an effective all-in estimate, not tax advice.</div>
           </div>
         </div>
-        <div class="settings-actions"><button class="secondary-btn" id="resetSettingsBtn">恢复默认 · Reset defaults</button><button class="primary-btn" id="saveSettingsBtn">保存设置 · Save settings</button></div>
+        <div class="settings-actions"><button class="secondary-btn" id="reset设置Btn">恢复默认</button><button class="primary-btn" id="save设置Btn">保存设置</button></div>
       </section>
     </main>
   </div>
 
   <dialog id="jobDialog">
     <form method="dialog" id="jobForm">
-      <div class="dialog-header"><h3>添加机会 · Add opportunity</h3><button value="cancel" class="icon-btn">×</button></div>
+      <div class="dialog-header"><h3>添加机会</h3><button value="cancel" class="icon-btn">×</button></div>
       <div class="form-grid">
-        <label>公司 · Company<input name="company" required></label>
-        <label>职位 · Title<input name="title" required></label>
-        <label>城市 · City<input name="city" required></label>
-        <label>地区 · Geography<select name="geography"><option>英国 / United Kingdom</option><option>欧洲 / Europe</option><option>美国 / United States</option><option>大中华区 / Greater China</option><option>中东 / Middle East</option></select></label>
-        <label>国家 · Country<input name="country" placeholder="United Kingdom"></label>
-        <label>货币 · Currency<select name="currency" id="jobCurrency"></select></label>
-        <label>职业路线 · Track<select name="track"><option>CFO</option><option>CEO/GM</option><option>Operating Partner</option></select></label>
-        <label>匹配度 · Fit score<input name="fitScore" type="number" min="0" max="100" value="80"></label>
-        <label>职业上升空间 · Career upside (1-10)<input name="careerUpside" type="number" min="1" max="10" step="0.5" value="8"></label>
-        <label>P&L 参与度 · P&L exposure (1-5)<input name="plExposure" type="number" min="1" max="5" value="3"></label>
-        <label>并购参与度 · M&A exposure (1-5)<input name="maExposure" type="number" min="1" max="5" value="2"></label>
-        <label>职业瓶颈风险 · Dead-end risk (1-5)<input name="deadEndRisk" type="number" min="1" max="5" value="2"></label>
-        <label>最低薪资（当地货币） · Salary min<input name="salaryMin" type="number" value="80000"></label>
-        <label>最高薪资（当地货币） · Salary max<input name="salaryMax" type="number" value="110000"></label>
-        <label>奖金 % · Bonus %<input name="bonusPct" type="number" min="0" max="500" value="0"></label>
-        <label class="full">匹配原因 · Why it fits<textarea name="whyFit" rows="3"></textarea></label>
-        <label class="full">主要风险 · Main risk<textarea name="risk" rows="2"></textarea></label>
-        <label class="full">职位链接 · Job URL<input name="url" type="url"></label>
-        <label class="full">职位描述 · Job description<textarea name="jobDescription" rows="8" placeholder="Paste the JD here to enable AI scoring..."></textarea></label>
+        <label>公司<input name="company" required></label>
+        <label>职位名称（保留原文）<input name="title" required></label>
+        <label>城市<input name="city" required></label>
+        <label>地区<select name="geography"><option>英国 / United Kingdom</option><option>欧洲 / Europe</option><option>美国 / United States</option><option>大中华区 / Greater China</option><option>中东 / Middle East</option></select></label>
+        <label>国家<input name="country" placeholder="United Kingdom"></label>
+        <label>货币<select name="currency" id="jobCurrency"></select></label>
+        <label>职业路线<select name="track"><option>CFO</option><option>CEO/GM</option><option>Operating Partner</option></select></label>
+        <label>匹配度<input name="fitScore" type="number" min="0" max="100" value="80"></label>
+        <label>职业上升空间 (1-10)<input name="careerUpside" type="number" min="1" max="10" step="0.5" value="8"></label>
+        <label>P&L 参与度 (1-5)<input name="plExposure" type="number" min="1" max="5" value="3"></label>
+        <label>并购参与度 (1-5)<input name="maExposure" type="number" min="1" max="5" value="2"></label>
+        <label>职业瓶颈风险 (1-5)<input name="deadEndRisk" type="number" min="1" max="5" value="2"></label>
+        <label>最低薪资（当地货币）<input name="salaryMin" type="number" value="80000"></label>
+        <label>最高薪资（当地货币）<input name="salaryMax" type="number" value="110000"></label>
+        <label>奖金 %<input name="bonusPct" type="number" min="0" max="500" value="0"></label>
+        <label class="full">匹配原因<textarea name="whyFit" rows="3"></textarea></label>
+        <label class="full">主要风险<textarea name="risk" rows="2"></textarea></label>
+        <label class="full">职位链接<input name="url" type="url"></label>
+        <label class="full">职位描述<textarea name="jobDescription" rows="8" placeholder="粘贴职位描述以启用 AI 评分..."></textarea></label>
       </div>
-      <div class="dialog-actions"><button value="cancel" class="secondary-btn">取消 · Cancel</button><button id="saveJobBtn" value="default" class="primary-btn">保存职位 · Save job</button><button id="scoreAndSaveBtn" value="default" class="primary-btn">AI 评分并保存 · AI score + save</button></div>
+      <div class="dialog-actions"><button value="cancel" class="secondary-btn">取消</button><button id="saveJobBtn" value="default" class="primary-btn">保存职位</button><button id="scoreAndSaveBtn" value="default" class="primary-btn">AI 评分并保存</button></div>
     </form>
   </dialog>
 
