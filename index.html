@@ -18,7 +18,7 @@
         <div class="brand-mark">LR</div>
         <div>
           <div class="brand-title">Lu Career Radar</div>
-          <div class="brand-sub">以经营者为导向的职业情报</div>
+          <div class="brand-sub">个人求职决策工具</div>
         </div>
       </div>
 
@@ -26,52 +26,42 @@
         <button class="nav-item active" data-view="dashboard">职业雷达</button>
         <button class="nav-item" data-view="pipeline">申请进度</button>
         <button class="nav-item" data-view="compensation">薪酬实验室</button>
-        <button class="nav-item" data-view="automation">自动化设置</button>
         <button class="nav-item" data-view="settings">税务与汇率</button>
       </nav>
 
-      <div class="sidebar-block">
-        <div class="sidebar-label">职业路线</div>
-        <label><input type="checkbox" class="track-filter" value="CFO" checked> CFO / 战略财务</label>
-        <label><input type="checkbox" class="track-filter" value="CEO/GM" checked> CEO / GM / P&L 经营</label>
-        <label><input type="checkbox" class="track-filter" value="Operating Partner" checked> Operating Partner</label>
-      </div>
 
-      <div class="sidebar-block">
-        <div class="sidebar-label">目标地区</div>
-        <label><input type="checkbox" class="geo-filter" value="UK" checked> 英国</label>
-        <label><input type="checkbox" class="geo-filter" value="Mainland China" checked> 中国大陆</label>
-        <label><input type="checkbox" class="geo-filter" value="Hong Kong" checked> 中国香港</label>
-        <label><input type="checkbox" class="geo-filter" value="Singapore" checked> 新加坡</label>
-        <label><input type="checkbox" class="geo-filter" value="Middle East" checked> 中东</label>
-      </div>
-
-      <div class="sidebar-footer">
-        <div class="tiny">重点识别能扩大 P&L、资本配置、交易和转型责任范围的职位。</div>
-      </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
         <div>
-          <div class="eyebrow">职业发展情报</div>
-          <h1>比较职业上升空间与实际税后收入</h1>
+          <div class="eyebrow">LU 的职位雷达</div>
+          <h1>找到真正值得我申请的职位</h1>
+          <p class="hero-sub">优先看能提高长期职业上限、而不是重复已有经验的机会。</p>
         </div>
         <div class="top-actions">
           <button class="primary-btn" id="runRadarBtn">立即抓取职位</button>
-          <button class="secondary-btn" id="exportBtn">导出数据</button>
-          <button class="secondary-btn" id="importBtn">导入职位</button>
-          <button class="primary-btn" id="addJobBtn">+ 添加职位</button>
+          <button class="secondary-btn utility-action" id="exportBtn">导出</button>
+          <button class="secondary-btn utility-action" id="importBtn">导入</button>
+          <button class="secondary-btn utility-action" id="addJobBtn">+ 手动添加</button>
           <input type="file" id="fileInput" accept="application/json" hidden>
         </div>
       </header>
 
       <section id="dashboardView" class="view active-view">
-        <div class="stats-grid">
-          <div class="stat-card"><span>可见职位</span><strong id="visibleCount">0</strong><small>所选地区与职业路线</small></div>
-          <div class="stat-card"><span>高匹配职位</span><strong id="strongFitCount">0</strong><small>匹配度 ≥ 85</small></div>
-          <div class="stat-card"><span>最高税后收入</span><strong id="bestNetPay">—</strong><small>预计年度税后人民币</small></div>
-          <div class="stat-card"><span>职业瓶颈预警</span><strong id="deadEndCount">0</strong><small>风险评分 ≥ 4/5</small></div>
+        <div class="stats-grid decision-stats">
+          <div class="stat-card"><span>当前职位</span><strong id="visibleCount">0</strong><small>符合当前筛选</small></div>
+          <div class="stat-card"><span>值得申请</span><strong id="strongFitCount">0</strong><small>匹配度 ≥ 85</small></div>
+          <div class="stat-card"><span>高潜机会</span><strong id="highPotentialCount">0</strong><small>职业上升空间 ≥ 9</small></div>
+        </div>
+
+        <div class="filter-panel">
+          <div class="filter-group"><span>地区</span><div class="filter-options">
+            <label><input type="checkbox" class="geo-filter" value="UK" checked> 英国</label><label><input type="checkbox" class="geo-filter" value="Mainland China" checked> 中国大陆</label><label><input type="checkbox" class="geo-filter" value="Hong Kong" checked> 香港</label><label><input type="checkbox" class="geo-filter" value="Singapore" checked> 新加坡</label><label><input type="checkbox" class="geo-filter" value="Middle East" checked> 中东</label>
+          </div></div>
+          <div class="filter-group"><span>职业方向</span><div class="filter-options">
+            <label><input type="checkbox" class="track-filter" value="CFO" checked> CFO</label><label><input type="checkbox" class="track-filter" value="CEO/GM" checked> CEO / GM</label><label><input type="checkbox" class="track-filter" value="Operating Partner" checked> PE 价值创造</label>
+          </div></div>
         </div>
 
         <div class="controls-card">
@@ -79,16 +69,12 @@
           <select id="locationSelect"><option value="All">全部地点</option></select>
           <select id="sortSelect">
             <option value="fit">排序：匹配度</option>
-            <option value="netRmb">排序：税后人民币</option>
             <option value="career">排序：职业上升空间</option>
-            <option value="pl">排序：P&L 参与度</option>
-            <option value="gross">排序：税前薪酬</option>
           </select>
         </div>
 
         <div class="section-heading">
-          <div><div class="eyebrow">机会列表</div><h2>优先职位</h2></div>
-          <div class="legend"><span class="dot green"></span> 申请 <span class="dot amber"></span> 挑战 <span class="dot red"></span> 跳过</div>
+          <div><div class="eyebrow">优先处理</div><h2>最值得关注的职位</h2></div>
         </div>
         <div id="jobGrid" class="job-grid"></div>
       </section>
