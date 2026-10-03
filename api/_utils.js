@@ -23,9 +23,24 @@ export function requireAccess(req, res) {
   return true;
 }
 
+function supabaseConfig() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error(
+      'Missing Supabase credentials. Expected SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SECRET_KEY/SUPABASE_SERVICE_ROLE_KEY/SUPABASE_ANON_KEY.'
+    );
+  }
+  return { url: url.replace(/\/$/, ''), key };
+}
+
 function supabaseHeaders(prefer) {
-  const key = process.env.SUPABASE_SECRET_KEY;
-  if (!process.env.SUPABASE_URL || !key) throw new Error('Missing SUPABASE_URL or SUPABASE_SECRET_KEY');
+  const { key } = supabaseConfig();
   return {
     apikey: key,
     authorization: `Bearer ${key}`,
@@ -35,9 +50,8 @@ function supabaseHeaders(prefer) {
 }
 
 export async function supabaseFetch(path, options = {}) {
-  const base = process.env.SUPABASE_URL?.replace(/\/$/, '');
-  if (!base) throw new Error('Missing SUPABASE_URL');
-  const resp = await fetch(`${base}/rest/v1/${path}`, {
+  const { url } = supabaseConfig();
+  const resp = await fetch(`${url}/rest/v1/${path}`, {
     ...options,
     headers: { ...supabaseHeaders(options.prefer), ...(options.headers || {}) }
   });
