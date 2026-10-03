@@ -82,6 +82,14 @@ export default async function handler(req, res) {
     const existing = await supabaseFetch('jobs?select=url,fingerprint&limit=5000');
     const urls = new Set(existing.map(x => x.url).filter(Boolean));
     const fresh = discovered.filter(x => /^https?:\/\//i.test(x.url||'') && !urls.has(x.url));
+    const priorityTitle = /senior finance manager|finance manager|finance business partner|strategic finance|commercial finance|fp&a|financial planning|finance director|head of finance|corporate development|m&a|value creation|portfolio operations|portfolio finance|portfolio performance|private equity|transformation|performance improvement/i;
+    const majorCompany = /amazon|aws|microsoft|google|tiktok|bytedance|unilever|procter|diageo|l'oréal|blackstone|kkr|apollo|mckinsey|bcg|bain/i;
+    fresh.sort((a,b) => {
+      const rank = j => (j.source === 'Official Web Discovery' ? 100 : 0)
+        + (majorCompany.test(j.company||'') ? 50 : 0)
+        + (priorityTitle.test(j.title||'') ? 25 : 0);
+      return rank(b) - rank(a);
+    });
     const saved = [];
     const errors = [];
 
