@@ -91,6 +91,18 @@ function inferEmploymentType(j){
   if(intern) return 'Internship';
   return 'Full-time';
 }
+function postedAgo(value){
+  if(!value)return '发布时间未知';
+  const ms=Date.now()-new Date(value).getTime();
+  if(!Number.isFinite(ms)||ms<0)return '刚刚发布';
+  const hours=Math.floor(ms/3600000);
+  if(hours<1)return '1小时内发布';
+  if(hours<24)return hours+'小时前发布';
+  const days=Math.floor(hours/24);
+  if(days<30)return days+'天前发布';
+  const months=Math.floor(days/30);
+  return months+'个月前发布';
+}
 function employmentTypeZh(t){return ({'Full-time':'全职','Internship':'实习','MBA Program':'MBA 项目','MBA Internship':'MBA 实习'})[t]||t||'全职'}
 function normalizeJob(j){const d=CITY_DEFAULTS[j.city]||{};return {...j,country:j.country||d.country||'',currency:j.currency||d.currency||'GBP',bonusPct:Number(j.bonusPct||0),employmentType:inferEmploymentType(j)}}
 jobs=jobs.map(normalizeJob);
@@ -136,10 +148,9 @@ function render(){
   const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向'};
   const trackOrder=['CFO','Operating Partner'];
   const cardHtml=j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
-    <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · ${j.industry||'—'}</div></div><div class="score-pill">${j.fitScore}%<br><small>匹配度</small></div></div>
+    <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · ${postedAgo(j.postedAt)}</div></div></div>
     <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${j.track}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
     <div class="money-strip"><div><span>市场薪酬参考</span><b>${(j.salaryMin||j.salaryMax) ? money(j.salaryMin,j.currency)+'–'+money(j.salaryMax,j.currency)+' / 年' : '待估算'}</b></div><div><span>预计税后人民币</span><b>${(j.salaryMin||j.salaryMax) ? rmb(nr)+' / 年' : '待估算'}</b></div></div>
-    <div class="job-copy"><b>匹配原因：</b> ${j.whyFit||'—'}<br><b>主要风险：</b> ${j.risk||'—'}</div>
     ${(j.jobDescriptionZh||j.jobDescription) ? `<details class="job-description"><summary>查看职位描述</summary><div class="job-copy" style="white-space:pre-wrap;margin-top:10px">${escapeHtml(j.jobDescriptionZh||j.jobDescription)}</div></details>` : ''}
     <div class="job-footer"><div class="recommendation ${cls}">${rec}</div><div class="job-actions"><button class="mini-btn" onclick='moveStatus(${JSON.stringify(String(j.id))})'>推进阶段</button>${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">申请职位</a>`:''}</div></div>
   </article>`};
