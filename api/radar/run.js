@@ -50,11 +50,17 @@ export default async function handler(req, res) {
   try {
     const maxScore = Math.min(Math.max(Number(req.body?.maxScore || 5), 1), 10);
     const discovered = [];
+    const rawJobs = [];
+    const sourceStats = [];
     const sourceErrors = [];
     for (const source of RADAR_SOURCES) {
       try {
         const jobs = source.type === 'lever' ? await fetchLever(source) : await fetchAshby(source);
-        discovered.push(...jobs.filter(isRelevantJob));
+        rawJobs.push(...jobs);
+        const marketJobs = jobs.filter(x=>Boolean(classifyMarket(x.location||'')));
+        const relevantJobs = jobs.filter(isRelevantJob);
+        discovered.push(...relevantJobs);
+        sourceStats.push({source:source.company,raw:jobs.length,market:marketJobs.length,relevant:relevantJobs.length});
       } catch (e) { sourceErrors.push({ source: source.company, error: e.message }); }
     }
 
@@ -77,7 +83,7 @@ export default async function handler(req, res) {
     }
 
     return json(res, 200, {
-      ok: true, sources: RADAR_SOURCES.length, discovered: discovered.length,
+      ok: true, sources: RADAR_SOURCES.length, rawDiscovered: rawJobs.length, sourceStats, discovered: discovered.length,
       newCandidates: fresh.length, scoredAndSaved: saved.length,
       jobs: saved, sourceErrors, errors
     });
