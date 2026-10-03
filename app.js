@@ -154,11 +154,11 @@ function render(){
   const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向'};
   const trackOrder=['CFO','Operating Partner'];
   const cardHtml=j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
-    <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · ${postedAgo(j.postedAt)}</div></div></div>
-    <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${ruleTrack(j)}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
-    <div class="money-strip"><div><span>市场薪酬参考</span><b>${(j.salaryMin||j.salaryMax) ? money(j.salaryMin,j.currency)+'–'+money(j.salaryMax,j.currency)+' / 年' : '待估算'}</b></div><div><span>预计税后人民币</span><b>${(j.salaryMin||j.salaryMax) ? rmb(nr)+' / 年' : '待估算'}</b></div></div>
-    ${(j.jobDescriptionZh||j.jobDescription) ? `<details class="job-description"><summary>查看职位描述</summary><div class="job-copy" style="white-space:pre-wrap;margin-top:10px">${escapeHtml(j.jobDescriptionZh||j.jobDescription)}</div></details>` : ''}
-    <div class="job-footer"><div class="recommendation ${cls}">${rec}</div><div class="job-actions"><button class="mini-btn" onclick='moveStatus(${JSON.stringify(String(j.id))})'>推进阶段</button>${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">申请职位</a>`:''}</div></div>
+    <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · 发布 ${postedAgo(j.postedAt)} · 数据更新 ${postedAgo(j.updatedAt||j.createdAt)}</div></div></div>
+    <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${ruleTrack(j)}</span></div>
+
+
+    <div class="job-footer"><div></div><div class="job-actions">${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">申请职位</a>`:''}</div></div>
   </article>`};
   const grouped=trackOrder.map(track=>{
     const trackJobs=list.filter(j=>ruleTrack(j)===track); if(!trackJobs.length)return '';
