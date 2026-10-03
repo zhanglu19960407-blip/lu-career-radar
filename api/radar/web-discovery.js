@@ -14,7 +14,12 @@ export async function discoverOfficialJobs({maxCompanies=100}={}){
   if(!key) throw new Error('Missing OPENAI_API_KEY');
   const model=process.env.OPENAI_MODEL || 'gpt-5.6-luna';
   const companies=WEB_DISCOVERY_COMPANIES.slice(0,Math.max(1,Math.min(Number(maxCompanies)||100,WEB_DISCOVERY_COMPANIES.length)));
-  const companyText=companies.map(x=>`${x.company}: ${x.domains.join(', ')}`).join('\n');
+  const batchSize=10;
+  const companyBatches=[];
+  for(let i=0;i<companies.length;i+=batchSize) companyBatches.push(companies.slice(i,i+batchSize));
+  const allJobs=[];
+  for(const batch of companyBatches){
+  const companyText=batch.map(x=>`${x.company}: ${x.domains.join(', ')}`).join('\n');
   const prompt=`Find currently open jobs ONLY on the official career domains listed below.
 
 TARGET COMPANIES AND ALLOWED OFFICIAL DOMAINS:
@@ -40,12 +45,16 @@ jobDescription should be a concise factual summary of the official posting suffi
   if(!r.ok) throw new Error(`Web discovery OpenAI error ${r.status}: ${(await r.text()).slice(0,300)}`);
   const data=await r.json();
   const jobs=parseJson(extractOutputText(data));
-  const allowed=new Map(companies.map(x=>[x.company,x.domains]));
-  return jobs.filter(j=>{
+  const allowed=new Map(batch.map(x=>[x.company,x.domains]));
+  const valid=jobs.filter(j=>{
     try{
       const host=new URL(j.url).hostname.toLowerCase();
       const domains=allowed.get(j.company)||[];
       return domains.some(d=>{const root=d.split('/')[0].toLowerCase();return host===root||host.endsWith('.'+root);});
     }catch{return false;}
   }).map(j=>({...j,source:'Official Web Discovery'}));
+  allJobs.push(...valid);
+  }
+  const seen=new Set();
+  return allJobs.filter(j=>{const k=j.url||`${j.company}|${j.title}|${j.location}`;if(seen.has(k))return false;seen.add(k);return true;});
 }
