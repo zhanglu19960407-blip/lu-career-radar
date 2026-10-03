@@ -14,13 +14,16 @@ export const TITLE_TERMS = [
   'fp&a','financial planning','finance business partner','commercial finance',
   'corporate finance','corporate development','m&a','value creation',
   'portfolio finance','finance director','head of finance','finance manager',
-  'finance transformation','strategy & operations','strategy and operations','transformation'
+  'finance transformation','strategy & operations','strategy and operations','transformation',
+  'business finance','strategic planning','business planning','commercial strategy',
+  'business strategy','chief financial officer','cfo','general manager','business unit',
+  'pricing','revenue strategy','growth strategy','investment','capital allocation'
 ];
 
 export const TARGET_MARKETS = [
-  { geography: 'UK', currency: 'GBP', pattern: /london|united kingdom|\buk\b|england/i },
-  { geography: 'Mainland China', currency: 'CNY', pattern: /china|shanghai|beijing|shenzhen|guangzhou|hangzhou|chengdu/i },
   { geography: 'Hong Kong', currency: 'HKD', pattern: /hong kong|\bhk\b/i },
+  { geography: 'UK', currency: 'GBP', pattern: /london|united kingdom|\buk\b|england|greater london/i },
+  { geography: 'Mainland China', currency: 'CNY', pattern: /mainland china|china|shanghai|beijing|shenzhen|guangzhou|hangzhou|chengdu/i },
   { geography: 'Singapore', currency: 'SGD', pattern: /singapore|\bsg\b/i },
   { geography: 'Middle East', currency: 'AED', pattern: /dubai|abu dhabi|united arab emirates|\buae\b|riyadh|saudi|qatar|doha|middle east|mena/i }
 ];
