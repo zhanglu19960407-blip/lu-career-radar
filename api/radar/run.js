@@ -79,7 +79,15 @@ export default async function handler(req, res) {
           body: JSON.stringify(db)
         });
         if (rows?.[0]) saved.push(dbToClient(rows[0]));
-      } catch (e) { errors.push({ company: job.company, title: job.title, error: e.message }); }
+      } catch (e) {
+        errors.push({ company: job.company, title: job.title, error: e.message });
+        const fallback = clientToDb({ ...job, recommendation: '待评分', whyFit: '职位已成功抓取，AI评分稍后补充。', risk: '尚未完成AI评估。' });
+        const rows = await supabaseFetch('jobs?on_conflict=fingerprint', {
+          method: 'POST', prefer: 'resolution=merge-duplicates,return=representation',
+          body: JSON.stringify(fallback)
+        });
+        if (rows?.[0]) saved.push(dbToClient(rows[0]));
+      }
     }
 
     const diagnostics={sources:RADAR_SOURCES.length,rawDiscovered:rawJobs.length,sourceStats,discovered:discovered.length,newCandidates:fresh.length,scoredAndSaved:saved.length,sourceErrors,errors};
