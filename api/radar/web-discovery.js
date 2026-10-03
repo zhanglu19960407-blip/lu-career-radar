@@ -11,19 +11,20 @@ function parseJson(text=''){
 }
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
-export async function discoverOfficialJobs({maxCompanies=100,onBatch=null,rotation=0}={}){
+export async function discoverOfficialJobs({maxCompanies=150,onBatch=null,rotation=0}={}){
   const key=process.env.OPENAI_API_KEY;
   if(!key) throw new Error('Missing OPENAI_API_KEY');
   const model=process.env.OPENAI_MODEL || 'gpt-5.6-luna';
-  const limit=Math.max(1,Math.min(Number(maxCompanies)||100,WEB_DISCOVERY_COMPANIES.length));
+  const limit=Math.max(1,Math.min(Number(maxCompanies)||150,WEB_DISCOVERY_COMPANIES.length));
   const t1=WEB_DISCOVERY_COMPANIES.filter(x=>x.tier===1);
   const t2=WEB_DISCOVERY_COMPANIES.filter(x=>x.tier===2);
   const t3=WEB_DISCOVERY_COMPANIES.filter(x=>x.tier===3);
+  const t4=WEB_DISCOVERY_COMPANIES.filter(x=>x.tier===4);
   const rotate=(arr,count,offset)=>Array.from({length:Math.min(count,arr.length)},(_,i)=>arr[(i+offset)%arr.length]);
-  // Every run: all 30 Tier-1 + 15 rotating Tier-2 + 5 rotating Tier-3 = 50 companies.
+  // Every run: all Tier-1 + 20 rotating Tier-2 + 10 rotating Tier-3 + 5 rotating Tier-4.
   // rotation changes by UTC day unless explicitly supplied.
   const r=Number.isFinite(Number(rotation))&&Number(rotation)!==0?Number(rotation):Math.floor(Date.now()/86400000);
-  const selected=[...t1,...rotate(t2,15,r*15),...rotate(t3,5,r*5)];
+  const selected=[...t1,...rotate(t2,20,r*20),...rotate(t3,10,r*10),...rotate(t4,5,r*5)];
   const companies=selected.slice(0,limit);
   const batchSize=10;
   const companyBatches=[];
