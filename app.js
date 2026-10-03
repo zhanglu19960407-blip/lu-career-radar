@@ -187,8 +187,10 @@ $('#runRadarBtn')?.addEventListener('click',async e=>{
   btn.disabled=true; btn.textContent='正在抓取职位…';
   try{
     const data=await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({})});
-    await loadCloudJobs();
-    updateConnectionStatus(`抓取完成：本次发现 ${data.discovered||0} 个相关职位，新增 ${data.newCandidates||0} 个；数据库当前共 ${jobs.length} 个职位。`);
+    const cloud=await apiFetch('/api/jobs');
+    jobs=Array.isArray(cloud.jobs)?cloud.jobs.map(normalizeJob):jobs;
+    save(); render();
+    updateConnectionStatus(`抓取完成：本次发现 ${data.discovered||0} 个相关职位，新增 ${data.newCandidates||0} 个；当前共 ${jobs.length} 个职位。`);
     if(data.errors?.length||data.sourceErrors?.length){
       console.warn('Radar partial errors',data.errors,data.sourceErrors);
     }
