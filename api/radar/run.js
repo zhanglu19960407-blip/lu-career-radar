@@ -82,8 +82,10 @@ export default async function handler(req, res) {
       } catch (e) { errors.push({ company: job.company, title: job.title, error: e.message }); }
     }
 
+    const diagnostics={sources:RADAR_SOURCES.length,rawDiscovered:rawJobs.length,sourceStats,discovered:discovered.length,newCandidates:fresh.length,scoredAndSaved:saved.length,sourceErrors,errors};
+    console.log('Career Radar diagnostics', JSON.stringify(diagnostics));
     return json(res, 200, {
-      ok: true, sources: RADAR_SOURCES.length, rawDiscovered: rawJobs.length, sourceStats, discovered: discovered.length,
+      ok: true, ...diagnostics,
       newCandidates: fresh.length, scoredAndSaved: saved.length,
       jobs: saved, sourceErrors, errors
     });
