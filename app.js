@@ -211,9 +211,9 @@ $('#saveSettingsBtn').addEventListener('click',()=>{$$('.fx-input').forEach(i=>s
 $('#resetSettingsBtn').addEventListener('click',()=>{settings=structuredClone(DEFAULT_SETTINGS);saveSettings();renderSettings();render()});
 $('#refreshFxBtn').addEventListener('click',async()=>{const btn=$('#refreshFxBtn'),status=$('#fxStatus');btn.disabled=true;status.textContent='正在刷新实时汇率…';try{const data=await apiFetch('/api/fx');for(const c of CURRENCIES){if(c==='CNY'){settings.fx.CNY=1;continue}const cnyPerUnit=data.rates[c]?1/data.rates[c]:null;if(cnyPerUnit)settings.fx[c]=Number(cnyPerUnit.toFixed(4))}saveSettings();renderSettings();render();status.textContent=`实时汇率已刷新（汇率日期：${data.date||'最新'}）。`}catch(err){status.textContent='实时汇率暂时无法刷新，已保留现有备用汇率。'}finally{btn.disabled=false}});
 
-$('#accessTokenInput').value=accessToken;
-$('#saveTokenBtn').addEventListener('click',()=>{accessToken=$('#accessTokenInput').value.trim();localStorage.setItem('careerRadarAccessToken',accessToken);updateConnectionStatus('访问令牌已保存到当前浏览器。');loadCloudJobs();});
-$('#testConnectionBtn').addEventListener('click',async()=>{try{const d=await apiFetch('/api/health');cloudConnected=true;updateConnectionStatus(`连接成功。Supabase：${d.supabaseConfigured?'就绪':'缺失'} · OpenAI：${d.openaiConfigured?'就绪':'缺失'} · 模型：${d.model}`);}catch(e){cloudConnected=false;updateConnectionStatus(`连接失败：${e.message}`);}});
+if($('#accessTokenInput')) $('#accessTokenInput').value=accessToken;
+$('#saveTokenBtn')?.addEventListener('click',()=>{accessToken=$('#accessTokenInput').value.trim();localStorage.setItem('careerRadarAccessToken',accessToken);updateConnectionStatus('访问令牌已保存到当前浏览器。');loadCloudJobs();});
+$('#testConnectionBtn')?.addEventListener('click',async()=>{try{const d=await apiFetch('/api/health');cloudConnected=true;updateConnectionStatus(`连接成功。Supabase：${d.supabaseConfigured?'就绪':'缺失'} · OpenAI：${d.openaiConfigured?'就绪':'缺失'} · 模型：${d.model}`);}catch(e){cloudConnected=false;updateConnectionStatus(`连接失败：${e.message}`);}});
 
 $$('.filter-toggle').forEach(btn=>btn.addEventListener('click',()=>{
   const checked=btn.dataset.check==='true';
@@ -221,7 +221,7 @@ $$('.filter-toggle').forEach(btn=>btn.addEventListener('click',()=>{
   render();
 }));
 refreshLocationOptions();
-$('#calcCity').value='London';$('#calcCurrency').value='GBP';renderSettings();refreshDynamicFilters();
+if($('#calcCity')) $('#calcCity').value='London'; if($('#calcCurrency')) $('#calcCurrency').value='GBP'; renderSettings(); refreshDynamicFilters();
 render();
 loadCloudJobs();
 
