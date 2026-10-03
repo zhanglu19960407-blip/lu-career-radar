@@ -82,7 +82,17 @@ function netLocal(gross,j){
   return {net:gross*(1-rate),tax:gross*rate,label:`${key} 有效税率 ${(rate*100).toFixed(0)}%`};
 }
 function netRmbForJob(j){const gross=totalCashMid(j);const n=netLocal(gross,j);return n.net*(settings.fx[j.currency]||1)}
-function normalizeJob(j){const d=CITY_DEFAULTS[j.city]||{};return {...j,country:j.country||d.country||'',currency:j.currency||d.currency||'GBP',bonusPct:Number(j.bonusPct||0)}}
+function inferEmploymentType(j){
+  if(j.employmentType) return j.employmentType;
+  const t=((j.title||'')+' '+(j.jobDescription||'')).toLowerCase();
+  const mba=/\bmba\b/.test(t), intern=/intern|internship/.test(t), program=/program|programme|rotation|rotational|leadership development/.test(t);
+  if(mba&&intern) return 'MBA Internship';
+  if(mba&&program) return 'MBA Program';
+  if(intern) return 'Internship';
+  return 'Full-time';
+}
+function employmentTypeZh(t){return ({'Full-time':'全职','Internship':'实习','MBA Program':'MBA 项目','MBA Internship':'MBA 实习'})[t]||t||'全职'}
+function normalizeJob(j){const d=CITY_DEFAULTS[j.city]||{};return {...j,country:j.country||d.country||'',currency:j.currency||d.currency||'GBP',bonusPct:Number(j.bonusPct||0),employmentType:inferEmploymentType(j)}}
 jobs=jobs.map(normalizeJob);
 
 function refreshLocationOptions(){
@@ -113,7 +123,7 @@ function render(){
   $('#visibleCount').textContent=list.length; $('#strongFitCount').textContent=list.filter(j=>j.fitScore>=85).length; if($('#highPotentialCount')) $('#highPotentialCount').textContent=list.filter(j=>j.careerUpside>=9).length;
   $('#jobGrid').innerHTML=list.map(j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
     <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · ${j.industry||'—'}</div></div><div class="score-pill">${j.fitScore}%<br><small>匹配度</small></div></div>
-    <div class="tag-row"><span class="tag">${j.track}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
+    <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${j.track}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
     <div class="money-strip"><div><span>市场薪酬参考</span><b>${(j.salaryMin||j.salaryMax) ? money(j.salaryMin,j.currency)+'–'+money(j.salaryMax,j.currency)+' / 年' : '待估算'}</b></div><div><span>预计税后人民币</span><b>${(j.salaryMin||j.salaryMax) ? rmb(nr)+' / 年' : '待估算'}</b></div></div>
     <div class="job-copy"><b>匹配原因：</b> ${j.whyFit||'—'}<br><b>主要风险：</b> ${j.risk||'—'}</div>
     ${(j.jobDescriptionZh||j.jobDescription) ? `<details class="job-description"><summary>查看职位描述</summary><div class="job-copy" style="white-space:pre-wrap;margin-top:10px">${escapeHtml(j.jobDescriptionZh||j.jobDescription)}</div></details>` : ''}
