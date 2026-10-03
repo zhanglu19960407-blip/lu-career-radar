@@ -1,0 +1,103 @@
+{
+  "name": "Lu Career Radar - Discover, Score, Store",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "cronExpression", "expression": "0 7 * * *"}]}},
+      "id": "schedule",
+      "name": "Daily 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-700, -120]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.JOB_FEED_URL }}",
+        "options": {"response": {"response": {"responseFormat": "json"}}}
+      },
+      "id": "fetch-feed",
+      "name": "Fetch Job Feed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-470, -120]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst list = Array.isArray(input) ? input : (input.jobs || input.data || input.results || []);\nreturn list.map(j => ({json:{\n  company: j.company || j.company_name || '',\n  title: j.title || j.job_title || '',\n  city: j.city || j.location?.city || '',\n  country: j.country || j.location?.country || '',\n  geography: j.geography || '',\n  currency: j.currency || '',\n  salaryMin: j.salaryMin ?? j.salary_min ?? 0,\n  salaryMax: j.salaryMax ?? j.salary_max ?? 0,\n  bonusPct: j.bonusPct ?? j.bonus_pct ?? 0,\n  industry: j.industry || '',\n  url: j.url || j.job_url || '',\n  source: j.source || 'job-feed',\n  jobDescription: j.jobDescription || j.description || j.job_description || ''\n}})).filter(x => x.json.company && x.json.title);"
+      },
+      "id": "normalize",
+      "name": "Normalize Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-230, -120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CAREER_RADAR_BASE_URL + '/api/ingest' }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [{"name": "X-Career-Radar-Token", "value": "={{ $env.CAREER_RADAR_ACCESS_TOKEN }}"}]},
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "ingest",
+      "name": "AI Score + Upsert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [20, -120],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {"httpMethod": "POST", "path": "career-radar-clay", "responseMode": "lastNode", "options": {}},
+      "id": "webhook",
+      "name": "Clay Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-700, 180],
+      "webhookId": "career-radar-clay"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $json.body || $json;\nconst rows = Array.isArray(b) ? b : (b.jobs || b.rows || [b]);\nreturn rows.map(j => ({json:{\n  company: j.company || j.company_name || '',\n  title: j.title || j.job_title || '',\n  city: j.city || '',\n  country: j.country || '',\n  geography: j.geography || '',\n  currency: j.currency || '',\n  salaryMin: j.salaryMin ?? j.salary_min ?? 0,\n  salaryMax: j.salaryMax ?? j.salary_max ?? 0,\n  bonusPct: j.bonusPct ?? j.bonus_pct ?? 0,\n  industry: j.industry || '',\n  url: j.url || j.job_url || '',\n  source: j.source || 'clay',\n  jobDescription: j.jobDescription || j.description || j.job_description || ''\n}})).filter(x => x.json.company && x.json.title);"
+      },
+      "id": "normalize-clay",
+      "name": "Normalize Clay Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-430, 180]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CAREER_RADAR_BASE_URL + '/api/ingest' }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [{"name": "X-Career-Radar-Token", "value": "={{ $env.CAREER_RADAR_ACCESS_TOKEN }}"}]},
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "ingest-clay",
+      "name": "AI Score + Upsert Clay",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-150, 180],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Daily 07:00": {"main": [[{"node": "Fetch Job Feed", "type": "main", "index": 0}]]},
+    "Fetch Job Feed": {"main": [[{"node": "Normalize Jobs", "type": "main", "index": 0}]]},
+    "Normalize Jobs": {"main": [[{"node": "AI Score + Upsert", "type": "main", "index": 0}]]},
+    "Clay Webhook": {"main": [[{"node": "Normalize Clay Rows", "type": "main", "index": 0}]]},
+    "Normalize Clay Rows": {"main": [[{"node": "AI Score + Upsert Clay", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "versionId": "0bde3e3a-0000-4000-8000-000000000003",
+  "meta": {"templateCredsSetupCompleted": false},
+  "tags": []
+}
