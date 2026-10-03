@@ -9,7 +9,9 @@ function parseJson(text=''){
   const parsed=JSON.parse(cleaned);
   return Array.isArray(parsed)?parsed:(parsed.jobs||[]);
 }
-export async function discoverOfficialJobs({maxCompanies=100}={}){
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+export async function discoverOfficialJobs({maxCompanies=100,onBatch=null}={}){
   const key=process.env.OPENAI_API_KEY;
   if(!key) throw new Error('Missing OPENAI_API_KEY');
   const model=process.env.OPENAI_MODEL || 'gpt-5.6-luna';
@@ -18,7 +20,9 @@ export async function discoverOfficialJobs({maxCompanies=100}={}){
   const companyBatches=[];
   for(let i=0;i<companies.length;i+=batchSize) companyBatches.push(companies.slice(i,i+batchSize));
   const allJobs=[];
-  for(const batch of companyBatches){
+  const batchErrors=[];
+  for(let batchIndex=0;batchIndex<companyBatches.length;batchIndex++){
+  const batch=companyBatches[batchIndex];
   const companyText=batch.map(x=>`${x.company}: ${x.domains.join(', ')}`).join('\n');
   const prompt=`Find currently open jobs ONLY on the official career domains listed below.
 
@@ -37,14 +41,27 @@ Return ONLY valid JSON with this shape:
 {"jobs":[{"company":"","title":"","location":"","industry":"","url":"","jobDescription":""}]}
 jobDescription should be a concise factual summary of the official posting sufficient for relevance screening. Do not invent missing facts.`;
 
-  const r=await fetch('https://api.openai.com/v1/responses',{
-    method:'POST',
-    headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
-    body:JSON.stringify({model,tools:[{type:'web_search',search_context_size:'medium'}],input:prompt})
-  });
-  if(!r.ok) throw new Error(`Web discovery OpenAI error ${r.status}: ${(await r.text()).slice(0,300)}`);
-  const data=await r.json();
-  const jobs=parseJson(extractOutputText(data));
+  let data=null;
+  let lastError=null;
+  for(let attempt=0;attempt<4;attempt++){
+    if(attempt>0) await sleep(6000*Math.pow(2,attempt-1));
+    const r=await fetch('https://api.openai.com/v1/responses',{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
+      body:JSON.stringify({model,tools:[{type:'web_search',search_context_size:'low'}],input:prompt})
+    });
+    if(r.ok){ data=await r.json(); break; }
+    const detail=(await r.text()).slice(0,300);
+    lastError=new Error(`Web discovery OpenAI error ${r.status}: ${detail}`);
+    if(r.status!==429 && r.status<500) break;
+  }
+  if(!data){
+    batchErrors.push({batch:batchIndex+1,companies:batch.map(x=>x.company),error:lastError?.message||'Unknown batch error'});
+    continue;
+  }
+  let jobs=[];
+  try{ jobs=parseJson(extractOutputText(data)); }
+  catch(e){ batchErrors.push({batch:batchIndex+1,companies:batch.map(x=>x.company),error:`Parse error: ${e.message}`}); continue; }
   const allowed=new Map(batch.map(x=>[x.company,x.domains]));
   const valid=jobs.filter(j=>{
     try{
@@ -54,7 +71,11 @@ jobDescription should be a concise factual summary of the official posting suffi
     }catch{return false;}
   }).map(j=>({...j,source:'Official Web Discovery'}));
   allJobs.push(...valid);
+  if(onBatch) await onBatch({batch:batchIndex+1,totalBatches:companyBatches.length,companies:batch,jobs:valid});
+  if(batchIndex<companyBatches.length-1) await sleep(6500);
   }
   const seen=new Set();
-  return allJobs.filter(j=>{const k=j.url||`${j.company}|${j.title}|${j.location}`;if(seen.has(k))return false;seen.add(k);return true;});
+  const jobs=allJobs.filter(j=>{const k=j.url||`${j.company}|${j.title}|${j.location}`;if(seen.has(k))return false;seen.add(k);return true;});
+  jobs.batchErrors=batchErrors;
+  return jobs;
 }
