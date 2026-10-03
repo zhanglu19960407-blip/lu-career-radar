@@ -14,15 +14,16 @@ const schema = {
     deadEndRisk: { type: 'integer', minimum: 1, maximum: 5 },
     recommendation: { type: 'string', enum: ['Apply','Stretch','Skip'] },
     whyFit: { type: 'string' },
-    risk: { type: 'string' }
+    risk: { type: 'string' },
+    jobDescriptionZh: { type: 'string' }
   },
-  required: ['track','fitScore','careerUpside','plExposure','maExposure','transformationExposure','leadershipExposure','optionalityScore','deadEndRisk','recommendation','whyFit','risk']
+  required: ['track','fitScore','careerUpside','plExposure','maExposure','transformationExposure','leadershipExposure','optionalityScore','deadEndRisk','recommendation','whyFit','risk','jobDescriptionZh']
 };
 
 export async function scoreJob(job) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error('Missing OPENAI_API_KEY');
-  const model = process.env.OPENAI_MODEL || 'gpt-6-astra';
+  const model = process.env.OPENAI_MODEL || 'gpt-5.6-luna';
   const prompt = `Evaluate this role for a finance-trained operator whose long-term paths are: (1) CFO / strategic finance leadership, (2) CEO / GM with direct P&L ownership, (3) PE Operating Partner / portfolio value creation.
 
 Candidate baseline: Oxford MBA; prior FP&A Manager / team-lead level experience; enterprise planning, BI/data transformation, business reviews, supply-chain/operations finance, senior executive partnering and team leadership. She already has strong budgeting, forecasting, reporting and analytics experience.
@@ -46,7 +47,8 @@ Calibration rules:
 - Recommendation: Apply = strong realistic target; Stretch = strategically attractive but has a meaningful entry gap; Skip = too junior, low-increment, wrong-function, or materially unrealistic.
 - Do not invent salary, sponsorship, responsibilities or facts absent from the JD.
 
-For whyFit and risk, ALWAYS write bilingual text in this exact order: "中文：...\nEnglish: ...". Be concise and decision-useful.
+Write whyFit and risk in concise Simplified Chinese only.
+Translate the full job description faithfully into natural Simplified Chinese and return it as jobDescriptionZh. Preserve headings, bullets, requirements, benefits, numbers, currencies, product names and proper nouns. Do not summarize or omit material information.
 
 ROLE:
 Company: ${job.company || ''}
