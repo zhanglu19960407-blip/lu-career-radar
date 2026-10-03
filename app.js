@@ -115,15 +115,13 @@ function refreshDynamicFilters(){
     $$('.'+cls).forEach(el=>el.addEventListener('change',render));
   };
   make('#industryFilters','industry-filter',[...new Set(jobs.map(j=>j.industry||'其他'))].sort((a,b)=>a.localeCompare(b,'zh-CN')));
-  make('#titleFilters','title-filter',[...new Set(jobs.map(j=>j.title).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en')));
 }
 function filteredJobs(){
   const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
   const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
   const industries=new Set($$('.industry-filter:checked').map(x=>x.value));
-  const titles=new Set($$('.title-filter:checked').map(x=>x.value));
   const q=$('#searchInput').value.toLowerCase().trim(), loc=$('#locationSelect').value, employment=$('#employmentTypeSelect')?.value||'All';
-  let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography)&&(!industries.size||industries.has(j.industry||'其他'))&&(!titles.size||titles.has(j.title)));
+  let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography)&&(!industries.size||industries.has(j.industry||'其他')));
   if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
   if(loc!=='All') list=list.filter(j=>j.city===loc);
   if(employment!=='All') list=list.filter(j=>inferEmploymentType(j)===employment);
