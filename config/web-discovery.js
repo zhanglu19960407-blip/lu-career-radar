@@ -163,4 +163,5 @@ export const WEB_DISCOVERY_TERMS = [
   'performance improvement','finance transformation','operating team','portfolio cfo',
   'corporate development manager','senior corporate development manager',
   'm&a manager','senior m&a manager','strategy & operations manager','strategy and operations manager'
-];
+,
+  'mba summer intern','mba intern','mba internship','mba summer associate'];
