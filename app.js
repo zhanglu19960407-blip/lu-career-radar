@@ -149,7 +149,7 @@ function filteredJobs(){
 }
 function render(){
   refreshLocationOptions();
-  const list=filteredJobs();
+  const list=[...jobs];
   if($('#jobCount')) $('#jobCount').textContent=list.length;
   const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向'};
   const trackOrder=['CFO','Operating Partner'];
