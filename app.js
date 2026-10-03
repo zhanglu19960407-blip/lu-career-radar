@@ -143,7 +143,7 @@ function renderSettings(){
 }
 function wireNav(){ $$('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{$$('.nav-item').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$$('.view').forEach(x=>x.classList.remove('active-view'));$('#'+btn.dataset.view+'View').classList.add('active-view');if(btn.dataset.view==='settings')renderSettings();if(btn.dataset.view==='compensation'){renderCompTable();renderCalc()}})) }
 wireNav();
-['change','input'].forEach(evt=>$('.track-filter,.geo-filter,#locationSelect,#employmentTypeSelect,#sortSelect,#searchInput').forEach(el=>el.addEventListener(evt,render)));
+['change','input'].forEach(evt=>document.querySelectorAll('.track-filter,.geo-filter,#locationSelect,#employmentTypeSelect,#sortSelect,#searchInput').forEach(el=>el.addEventListener(evt,render)));
 ['change','input'].forEach(evt=>['#calcCity','#calcCurrency','#calcSalary','#calcBonus'].forEach(sel=>$(sel)?.addEventListener(evt,()=>{if(sel==='#calcCity'){const d=CITY_DEFAULTS[$('#calcCity').value];if(d)$('#calcCurrency').value=d.currency}renderCalc()})));
 
 $('#runRadarBtn')?.addEventListener('click',async e=>{
