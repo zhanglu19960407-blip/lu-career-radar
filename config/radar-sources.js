@@ -32,17 +32,24 @@ export const RADAR_SOURCES = [
 ];
 
 export const CFO_TITLE_TERMS = [
-  'finance','fp&a','financial planning','business partner','commercial finance',
-  'strategic finance','corporate finance','corporate development','m&a',
-  'treasury','capital allocation','investment','pricing','revenue','business finance',
-  'financial strategy','strategic planning','business planning'
+  'senior finance manager',
+  'finance business partner','senior finance business partner',
+  'strategic finance manager','senior strategic finance manager',
+  'commercial finance manager','senior commercial finance manager',
+  'finance director','associate finance director'
 ];
 
 export const PE_TITLE_TERMS = [
-  'value creation','portfolio operations','portfolio finance','portfolio performance',
-  'private equity','operating team','performance improvement','transformation',
-  'corporate development','m&a','deal','transaction','commercial due diligence',
-  'strategy & operations','strategy and operations'
+  'portfolio operations','portfolio finance','value creation','portfolio performance',
+  'performance improvement','finance transformation','operating team',
+  'pe portfolio operations','portfolio cfo','value creation manager','value creation senior manager'
+];
+
+export const BRIDGE_TITLE_TERMS = [
+  'corporate development manager','corporate development senior manager',
+  'senior corporate development manager','m&a manager','senior m&a manager',
+  'strategy & operations manager','strategy and operations manager',
+  'strategic finance','transformation','performance improvement'
 ];
 
 export const TARGET_MARKETS = [
@@ -62,6 +69,6 @@ export function isRelevantJob(job) {
   const description = (job.jobDescription || '').toLowerCase();
   const location = job.location || '';
   if (!classifyMarket(location)) return false;
-  const terms = [...CFO_TITLE_TERMS, ...PE_TITLE_TERMS];
-  return terms.some(term => title.includes(term)) || terms.some(term => description.includes(term));
+  const terms = [...CFO_TITLE_TERMS, ...PE_TITLE_TERMS, ...BRIDGE_TITLE_TERMS];
+  return terms.some(term => title.includes(term));
 }
