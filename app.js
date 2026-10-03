@@ -135,6 +135,23 @@ wireNav();
 ['change','input'].forEach(evt=>$$('.track-filter,.geo-filter,#locationSelect,#sortSelect,#searchInput').forEach(el=>el.addEventListener(evt,render)));
 ['change','input'].forEach(evt=>['#calcCity','#calcCurrency','#calcSalary','#calcBonus'].forEach(sel=>$(sel)?.addEventListener(evt,()=>{if(sel==='#calcCity'){const d=CITY_DEFAULTS[$('#calcCity').value];if(d)$('#calcCurrency').value=d.currency}renderCalc()})));
 
+$('#runRadarBtn')?.addEventListener('click',async e=>{
+  const btn=e.currentTarget;
+  const original=btn.textContent;
+  btn.disabled=true; btn.textContent='正在抓取并评分…';
+  try{
+    const data=await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({maxScore:5})});
+    updateConnectionStatus(`抓取完成：发现 ${data.discovered||0} 个相关职位，新增候选 ${data.newCandidates||0} 个，AI 评分并保存 ${data.scoredAndSaved||0} 个。`);
+    await loadCloudJobs();
+    if(data.errors?.length||data.sourceErrors?.length){
+      console.warn('Radar partial errors',data.errors,data.sourceErrors);
+    }
+  }catch(err){
+    updateConnectionStatus(`职位抓取失败：${err.message}`);
+    alert(`职位抓取失败：${err.message}`);
+  }finally{btn.disabled=false;btn.textContent=original;}
+});
+
 const dialog=$('#jobDialog');$('#addJobBtn').addEventListener('click',()=>dialog.showModal());
 function formToJob(){const fd=new FormData($('#jobForm')),obj=Object.fromEntries(fd.entries());['fitScore','careerUpside','plExposure','maExposure','deadEndRisk','salaryMin','salaryMax','bonusPct'].forEach(k=>obj[k]=Number(obj[k]));const d=CITY_DEFAULTS[obj.city]||{};obj.id=obj.id||Date.now();obj.status='Inbox';obj.industry=obj.industry||'';obj.country=obj.country||d.country||'';obj.currency=obj.currency||d.currency||'GBP';return obj;}
 $('#saveJobBtn').addEventListener('click',async e=>{e.preventDefault();let obj=formToJob();try{obj=await upsertCloudJob(obj);}catch(err){updateConnectionStatus(`已保存到本地；云端保存失败：${err.message}`)}jobs.unshift(obj);jobs=[...new Map(jobs.map(x=>[String(x.id),x])).values()];save();dialog.close();$('#jobForm').reset();render()});
