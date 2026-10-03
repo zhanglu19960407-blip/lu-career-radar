@@ -3,7 +3,7 @@ import { cors, requireAccess, json } from './_utils.js';
 const schema = {
   type: 'object', additionalProperties: false,
   properties: {
-    track: { type: 'string', enum: ['CFO','CEO/GM','Operating Partner'] },
+    track: { type: 'string', enum: ['CFO','Operating Partner'] },
     fitScore: { type: 'integer', minimum: 0, maximum: 100 },
     careerUpside: { type: 'number', minimum: 1, maximum: 10 },
     plExposure: { type: 'integer', minimum: 1, maximum: 5 },
@@ -29,7 +29,7 @@ export async function scoreJob(job) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error('Missing OPENAI_API_KEY');
   const model = process.env.OPENAI_MODEL || 'gpt-5.6-luna';
-  const prompt = `Evaluate this role for a finance-trained operator whose long-term paths are: (1) CFO / strategic finance leadership, (2) CEO / GM with direct P&L ownership, (3) PE Operating Partner / portfolio value creation.
+  const prompt = `Evaluate this role for a finance-trained operator whose two target paths are: (1) CFO / strategic finance leadership and (2) PE Operating Partner / portfolio value creation.
 
 Candidate baseline: Oxford MBA; prior FP&A Manager / team-lead level experience; enterprise planning, BI/data transformation, business reviews, supply-chain/operations finance, senior executive partnering and team leadership. She already has strong budgeting, forecasting, reporting and analytics experience.
 
@@ -46,7 +46,6 @@ Calibration rules:
 - Reward roles where finance influences revenue, pricing, GTM, market entry, product investment, resource allocation, deals or a business-unit P&L.
 - Reward credible step-ups in scope (Senior Manager/Director/Head) only when requirements are realistically attainable; do not confuse prestige with fit.
 - For CFO track, value breadth across commercial finance + capital allocation + M&A + controllership/treasury exposure.
-- For CEO/GM track, require meaningful operating/commercial/P&L decision exposure.
 - For Operating Partner track, require transformation, value creation, portfolio/deal exposure or repeatable operating improvement.
 - careerUpside reflects what the role can unlock in 3-7 years; fitScore balances attainability and strategic increment.
 - Recommendation: Apply = strong realistic target; Stretch = strategically attractive but has a meaningful entry gap; Skip = too junior, low-increment, wrong-function, or materially unrealistic.
