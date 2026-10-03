@@ -109,10 +109,11 @@ function refreshLocationOptions(){
 function filteredJobs(){
   const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
   const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
-  const q=$('#searchInput').value.toLowerCase().trim(), loc=$('#locationSelect').value;
+  const q=$('#searchInput').value.toLowerCase().trim(), loc=$('#locationSelect').value, employment=$('#employmentTypeSelect')?.value||'All';
   let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography));
   if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
   if(loc!=='All') list=list.filter(j=>j.city===loc);
+  if(employment!=='All') list=list.filter(j=>inferEmploymentType(j)===employment);
   const sort=$('#sortSelect').value;
   list.sort((a,b)=>sort==='career'?b.careerUpside-a.careerUpside:sort==='pl'?b.plExposure-a.plExposure:sort==='gross'?totalCashMid(b)*(settings.fx[b.currency]||1)-totalCashMid(a)*(settings.fx[a.currency]||1):sort==='netRmb'?netRmbForJob(b)-netRmbForJob(a):b.fitScore-a.fitScore);
   return list;
@@ -142,7 +143,7 @@ function renderSettings(){
 }
 function wireNav(){ $$('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{$$('.nav-item').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$$('.view').forEach(x=>x.classList.remove('active-view'));$('#'+btn.dataset.view+'View').classList.add('active-view');if(btn.dataset.view==='settings')renderSettings();if(btn.dataset.view==='compensation'){renderCompTable();renderCalc()}})) }
 wireNav();
-['change','input'].forEach(evt=>$$('.track-filter,.geo-filter,#locationSelect,#sortSelect,#searchInput').forEach(el=>el.addEventListener(evt,render)));
+['change','input'].forEach(evt=>$('.track-filter,.geo-filter,#locationSelect,#employmentTypeSelect,#sortSelect,#searchInput').forEach(el=>el.addEventListener(evt,render)));
 ['change','input'].forEach(evt=>['#calcCity','#calcCurrency','#calcSalary','#calcBonus'].forEach(sel=>$(sel)?.addEventListener(evt,()=>{if(sel==='#calcCity'){const d=CITY_DEFAULTS[$('#calcCity').value];if(d)$('#calcCurrency').value=d.currency}renderCalc()})));
 
 $('#runRadarBtn')?.addEventListener('click',async e=>{
