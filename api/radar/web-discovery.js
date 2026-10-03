@@ -9,11 +9,11 @@ function parseJson(text=''){
   const parsed=JSON.parse(cleaned);
   return Array.isArray(parsed)?parsed:(parsed.jobs||[]);
 }
-export async function discoverOfficialJobs({maxCompanies=4}={}){
+export async function discoverOfficialJobs({maxCompanies=100}={}){
   const key=process.env.OPENAI_API_KEY;
   if(!key) throw new Error('Missing OPENAI_API_KEY');
   const model=process.env.OPENAI_MODEL || 'gpt-5.6-luna';
-  const companies=WEB_DISCOVERY_COMPANIES.slice(0,Math.max(1,Math.min(Number(maxCompanies)||4,14)));
+  const companies=WEB_DISCOVERY_COMPANIES.slice(0,Math.max(1,Math.min(Number(maxCompanies)||100,WEB_DISCOVERY_COMPANIES.length)));
   const companyText=companies.map(x=>`${x.company}: ${x.domains.join(', ')}`).join('\n');
   const prompt=`Find currently open jobs ONLY on the official career domains listed below.
 
@@ -26,7 +26,7 @@ ${WEB_DISCOVERY_MARKETS.join(', ')}
 TARGET ROLE THEMES:
 ${WEB_DISCOVERY_TERMS.join(', ')}
 
-Return at most 20 strong matches. Every result MUST be a currently open individual job posting, not a search page, company careers homepage, LinkedIn page, aggregator, cached page, or expired posting. The url MUST point to an allowed official company domain above. Prefer finance leadership, strategic/commercial finance, FP&A leadership, finance business partnering, corporate development/M&A, strategy & operations, business operations, value creation, GM-track, and MBA-specific programs/internships.
+Return at most 100 strong matches. Every result MUST be a currently open individual job posting, not a search page, company careers homepage, LinkedIn page, aggregator, cached page, or expired posting. The url MUST point to an allowed official company domain above. Only return roles whose job title matches the TARGET ROLE THEMES. Do not broaden to generic finance, accounting, analyst, business operations, GM-track, or MBA roles.
 
 Return ONLY valid JSON with this shape:
 {"jobs":[{"company":"","title":"","location":"","industry":"","url":"","jobDescription":""}]}
