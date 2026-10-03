@@ -58,7 +58,7 @@ export default async function handler(req, res) {
         const jobs = source.type === 'lever' ? await fetchLever(source) : await fetchAshby(source);
         rawJobs.push(...jobs);
         const marketJobs = jobs.filter(x=>Boolean(classifyMarket(x.location||'')));
-        const relevantJobs = jobs.filter(isRelevantJob);
+        const relevantJobs = jobs.filter(x=>isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
         discovered.push(...relevantJobs);
         sourceStats.push({source:source.company,raw:jobs.length,market:marketJobs.length,relevant:relevantJobs.length});
       } catch (e) { sourceErrors.push({ source: source.company, error: e.message }); }
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
 
     const existing = await supabaseFetch('jobs?select=url,fingerprint&limit=5000');
     const urls = new Set(existing.map(x => x.url).filter(Boolean));
-    const fresh = discovered.filter(x => !x.url || !urls.has(x.url));
+    const fresh = discovered.filter(x => /^https?:\/\//i.test(x.url||'') && !urls.has(x.url));
     const saved = [];
     const errors = [];
 
