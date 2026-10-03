@@ -61,7 +61,7 @@ export function isRelevantJob(job) {
   const title = (job.title || '').toLowerCase();
   const description = (job.jobDescription || '').toLowerCase();
   const location = job.location || '';
-  const haystack = `${title} ${description}`;
-  const relevanceMatch = TITLE_TERMS.some(term => haystack.includes(term));
-  return relevanceMatch && Boolean(classifyMarket(location));
+  if (!classifyMarket(location)) return false;
+  const terms = [...CFO_TITLE_TERMS, ...PE_TITLE_TERMS];
+  return terms.some(term => title.includes(term)) || terms.some(term => description.includes(term));
 }
