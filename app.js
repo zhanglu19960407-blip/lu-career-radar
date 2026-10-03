@@ -56,7 +56,8 @@ function salaryMid(j){return ((Number(j.salaryMin)||0)+(Number(j.salaryMax)||0))
 function totalCashMid(j){return salaryMid(j)*(1+(Number(j.bonusPct)||0)/100)}
 function money(n,c='GBP'){try{return new Intl.NumberFormat('en-GB',{style:'currency',currency:c,maximumFractionDigits:0}).format(n||0)}catch{return `${c} ${Math.round(n||0).toLocaleString()}`}}
 function rmb(n){return `¥${Math.round(n||0).toLocaleString('zh-CN')}`}
-function statusZh(s){return ({Inbox:'待处理',Researching:'研究中',Shortlist:'候选名单',Applied:'已申请'})[s]||s}\nfunction recommendation(j){if(j.deadEndRisk>=4)return['跳过','rec-skip'];if(j.fitScore>=85&&j.careerUpside>=8)return['申请','rec-apply'];return['挑战','rec-stretch']}
+function statusZh(s){return ({Inbox:'待处理',Researching:'研究中',Shortlist:'候选名单',Applied:'已申请'})[s]||s}
+function recommendation(j){if(j.deadEndRisk>=4)return['跳过','rec-skip'];if(j.fitScore>=85&&j.careerUpside>=8)return['申请','rec-apply'];return['挑战','rec-stretch']}
 
 function ukEnglandNet(gross){
   gross=Math.max(0,Number(gross)||0);
