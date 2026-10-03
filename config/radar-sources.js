@@ -32,11 +32,12 @@ export const RADAR_SOURCES = [
 ];
 
 export const CFO_TITLE_TERMS = [
-  'senior finance manager',
+  'finance manager','senior finance manager',
   'finance business partner','senior finance business partner',
   'strategic finance manager','senior strategic finance manager',
   'commercial finance manager','senior commercial finance manager',
-  'finance director','associate finance director'
+  'finance director','associate finance director',
+  'senior financial analyst','fp&a manager','senior fp&a manager'
 ];
 
 export const PE_TITLE_TERMS = [
