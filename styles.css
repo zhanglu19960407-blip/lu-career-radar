@@ -6,6 +6,6 @@
 .filter-panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:18px 0 12px;box-shadow:var(--shadow);display:grid;gap:14px}
 .filter-group{display:flex;align-items:center;gap:18px}.filter-group>span{width:72px;font-size:12px;font-weight:700;color:var(--muted)}
 .filter-options{display:flex;gap:8px;flex-wrap:wrap}.filter-options label{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:#fafbf9;cursor:pointer}.filter-options input{margin-right:5px}
-#dashboardView .controls-card{grid-template-columns:minmax(260px,1fr) 180px 180px;margin-top:12px}
+#dashboardView .controls-card{grid-template-columns:minmax(240px,1fr) 150px 170px 170px;margin-top:12px}
 #dashboardView .section-heading{margin-top:28px}
 @media(max-width:760px){.decision-stats{grid-template-columns:repeat(3,1fr)}.filter-group{align-items:flex-start;flex-direction:column;gap:8px}.filter-group>span{width:auto}.utility-action{display:none}}
