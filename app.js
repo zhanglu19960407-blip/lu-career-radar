@@ -78,3 +78,77 @@ function netLocal(gross,j){
   if(key==='England'&&j.currency==='GBP') return ukEnglandNet(gross);
   const rate=settings.effectiveTax[key] ?? settings.effectiveTax.Other ?? .30;
   return {net:gross*(1-rate),tax:gross*rate,label:`${key} ${(rate*100).toFixed(0)}% effective`};
+}
+function netRmbForJob(j){const gross=totalCashMid(j);const n=netLocal(gross,j);return n.net*(settings.fx[j.currency]||1)}
+function normalizeJob(j){const d=CITY_DEFAULTS[j.city]||{};return {...j,country:j.country||d.country||'',currency:j.currency||d.currency||'GBP',bonusPct:Number(j.bonusPct||0)}}
+jobs=jobs.map(normalizeJob);
+
+function refreshLocationOptions(){
+  const cities=[...new Set([...Object.keys(CITY_DEFAULTS),...jobs.map(j=>j.city).filter(Boolean)])].sort();
+  const cur=$('#locationSelect')?.value||'All';
+  if($('#locationSelect')) $('#locationSelect').innerHTML='<option value="All">All locations</option>'+cities.map(c=>`<option>${c}</option>`).join('');
+  if(cities.includes(cur)||cur==='All') $('#locationSelect').value=cur;
+  const opts=cities.map(c=>`<option>${c}</option>`).join('');
+  if($('#calcCity')) $('#calcCity').innerHTML=opts;
+  const currOpts=CURRENCIES.map(c=>`<option>${c}</option>`).join('');
+  if($('#calcCurrency')) $('#calcCurrency').innerHTML=currOpts;
+  if($('#jobCurrency')) $('#jobCurrency').innerHTML=currOpts;
+}
+function filteredJobs(){
+  const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
+  const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
+  const q=$('#searchInput').value.toLowerCase().trim(), loc=$('#locationSelect').value;
+  let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography));
+  if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
+  if(loc!=='All') list=list.filter(j=>j.city===loc);
+  const sort=$('#sortSelect').value;
+  list.sort((a,b)=>sort==='career'?b.careerUpside-a.careerUpside:sort==='pl'?b.plExposure-a.plExposure:sort==='gross'?totalCashMid(b)*(settings.fx[b.currency]||1)-totalCashMid(a)*(settings.fx[a.currency]||1):sort==='netRmb'?netRmbForJob(b)-netRmbForJob(a):b.fitScore-a.fitScore);
+  return list;
+}
+function render(){
+  refreshLocationOptions();
+  const list=filteredJobs();
+  $('#visibleCount').textContent=list.length; $('#strongFitCount').textContent=list.filter(j=>j.fitScore>=85).length; $('#deadEndCount').textContent=list.filter(j=>j.deadEndRisk>=4).length;
+  $('#bestNetPay').textContent=list.length?rmb(Math.max(...list.map(netRmbForJob))):'—';
+  $('#jobGrid').innerHTML=list.map(j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
+    <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · ${j.industry||'—'}</div></div><div class="score-pill">${j.fitScore}%<br><small>fit</small></div></div>
+    <div class="tag-row"><span class="tag">${j.track}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">Bonus ${j.bonusPct||0}%</span><span class="tag">${j.status||'Inbox'}</span></div>
+    <div class="money-strip"><div><span>Est. annual take-home</span><b>${rmb(nr)}</b></div><div><span>Est. monthly take-home</span><b>${rmb(nr/12)}</b></div></div>
+    <div class="job-copy"><b>Why it fits:</b> ${j.whyFit||'—'}<br><b>Risk:</b> ${j.risk||'—'}</div>
+    <div class="metric-row"><div class="metric"><span>Upside</span><b>${j.careerUpside}/10</b></div><div class="metric"><span>P&L</span><b>${j.plExposure}/5</b></div><div class="metric"><span>M&A</span><b>${j.maExposure}/5</b></div><div class="metric"><span>Dead-end</span><b>${j.deadEndRisk}/5</b></div></div>
+    <div class="job-footer"><div class="recommendation ${cls}">${rec.toUpperCase()}</div><div class="job-actions"><button class="mini-btn" onclick='moveStatus(${JSON.stringify(String(j.id))})'>Move stage</button>${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">Open</a>`:''}</div></div>
+  </article>`}).join('')||'<div class="job-card">No roles match these filters.</div>';
+  renderPipeline();renderCompTable();renderCalc();
+}
+function renderPipeline(){const stages=['Inbox','Researching','Shortlist','Applied'];$('#pipelineBoard').innerHTML=stages.map(stage=>`<div class="pipeline-col"><h3>${stage}</h3>${jobs.filter(j=>(j.status||'Inbox')===stage).map(j=>`<div class="pipeline-card"><b>${j.title}</b><small>${j.company} · ${j.city}</small><small>${rmb(netRmbForJob(j))} est. net / yr</small></div>`).join('')}</div>`).join('')}
+function renderCompTable(){const body=$('#compTable tbody');if(!body)return;body.innerHTML=[...jobs].sort((a,b)=>netRmbForJob(b)-netRmbForJob(a)).map(j=>{const gross=totalCashMid(j),n=netLocal(gross,j),nr=n.net*(settings.fx[j.currency]||1);return `<tr><td><b>${j.title}</b><br><small>${j.company}</small></td><td>${j.city}</td><td>${money(gross,j.currency)}</td><td>${money(n.net,j.currency)}</td><td><b>${rmb(nr)}</b></td><td>${rmb(nr/12)}</td><td>${n.label}</td></tr>`}).join('')}
+function renderCalc(){if(!$('#calcCity'))return;const city=$('#calcCity').value||'London',d=CITY_DEFAULTS[city]||{},currency=$('#calcCurrency').value||d.currency||'GBP',base=Number($('#calcSalary').value||0),bonus=Number($('#calcBonus').value||0),gross=base+bonus,j={city,country:d.country||'',currency},n=netLocal(gross,j),nr=n.net*(settings.fx[currency]||1);$('#calcResult').innerHTML=`<div><span>Gross local</span><b>${money(gross,currency)}</b></div><div><span>Estimated local net</span><b>${money(n.net,currency)}</b></div><div><span>Estimated net RMB / year</span><b>${rmb(nr)}</b></div><div><span>Estimated net RMB / month</span><b>${rmb(nr/12)}</b></div>`}
+window.moveStatus=async id=>{const order=['Inbox','Researching','Shortlist','Applied'];const j=jobs.find(x=>String(x.id)===String(id));if(!j)return;j.status=order[(order.indexOf(j.status||'Inbox')+1)%order.length];save();render();if(cloudConnected){try{await apiFetch(`/api/jobs?id=${encodeURIComponent(id)}`,{method:'PATCH',body:JSON.stringify(j)});}catch(e){updateConnectionStatus(`Stage saved locally; cloud update failed: ${e.message}`)}}};
+
+function renderSettings(){
+  $('#fxSettings').innerHTML=CURRENCIES.map(c=>`<div class="settings-row"><span>1 ${c} =</span><input class="fx-input" data-currency="${c}" type="number" step="0.0001" value="${settings.fx[c]??''}"><small>RMB</small></div>`).join('');
+  $('#taxSettings').innerHTML=Object.entries(settings.effectiveTax).map(([k,v])=>`<div class="settings-row"><span>${k}</span><input class="tax-input" data-taxkey="${k}" type="number" step="0.1" min="0" max="70" value="${(v*100).toFixed(1)}"><small>%</small></div>`).join('');
+}
+function wireNav(){ $$('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{$$('.nav-item').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$$('.view').forEach(x=>x.classList.remove('active-view'));$('#'+btn.dataset.view+'View').classList.add('active-view');if(btn.dataset.view==='settings')renderSettings();if(btn.dataset.view==='compensation'){renderCompTable();renderCalc()}})) }
+wireNav();
+['change','input'].forEach(evt=>$$('.track-filter,.geo-filter,#locationSelect,#sortSelect,#searchInput').forEach(el=>el.addEventListener(evt,render)));
+['change','input'].forEach(evt=>['#calcCity','#calcCurrency','#calcSalary','#calcBonus'].forEach(sel=>$(sel)?.addEventListener(evt,()=>{if(sel==='#calcCity'){const d=CITY_DEFAULTS[$('#calcCity').value];if(d)$('#calcCurrency').value=d.currency}renderCalc()})));
+
+const dialog=$('#jobDialog');$('#addJobBtn').addEventListener('click',()=>dialog.showModal());
+function formToJob(){const fd=new FormData($('#jobForm')),obj=Object.fromEntries(fd.entries());['fitScore','careerUpside','plExposure','maExposure','deadEndRisk','salaryMin','salaryMax','bonusPct'].forEach(k=>obj[k]=Number(obj[k]));const d=CITY_DEFAULTS[obj.city]||{};obj.id=obj.id||Date.now();obj.status='Inbox';obj.industry=obj.industry||'';obj.country=obj.country||d.country||'';obj.currency=obj.currency||d.currency||'GBP';return obj;}
+$('#saveJobBtn').addEventListener('click',async e=>{e.preventDefault();let obj=formToJob();try{obj=await upsertCloudJob(obj);}catch(err){updateConnectionStatus(`Saved locally; cloud save failed: ${err.message}`)}jobs.unshift(obj);jobs=[...new Map(jobs.map(x=>[String(x.id),x])).values()];save();dialog.close();$('#jobForm').reset();render()});
+$('#scoreAndSaveBtn').addEventListener('click',async e=>{e.preventDefault();const btn=e.currentTarget;btn.disabled=true;btn.textContent='Scoring…';try{let obj=formToJob();if(!obj.jobDescription?.trim())throw new Error('Paste the job description first.');const scored=await apiFetch('/api/score-job',{method:'POST',body:JSON.stringify(obj)});obj={...obj,...scored};obj=await upsertCloudJob(obj);jobs.unshift(obj);jobs=[...new Map(jobs.map(x=>[String(x.id),x])).values()];save();dialog.close();$('#jobForm').reset();render();updateConnectionStatus('AI-scored job saved to cloud.');}catch(err){alert(err.message);}finally{btn.disabled=false;btn.textContent='AI score + save';}});
+$('#importBtn').addEventListener('click',()=>$('#fileInput').click());
+$('#fileInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);jobs=(Array.isArray(data)?data:data.jobs).map(normalizeJob);save();render()}catch{alert('Invalid JSON file.')}};r.readAsText(f)});
+$('#exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),jobs,settings},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lu-career-radar-data.json';a.click();URL.revokeObjectURL(a.href)});
+$('#saveSettingsBtn').addEventListener('click',()=>{$$('.fx-input').forEach(i=>settings.fx[i.dataset.currency]=Number(i.value));$$('.tax-input').forEach(i=>settings.effectiveTax[i.dataset.taxkey]=Number(i.value)/100);saveSettings();render();$('#fxStatus').textContent='Settings saved locally in this browser.'});
+$('#resetSettingsBtn').addEventListener('click',()=>{settings=structuredClone(DEFAULT_SETTINGS);saveSettings();renderSettings();render()});
+$('#refreshFxBtn').addEventListener('click',async()=>{const btn=$('#refreshFxBtn'),status=$('#fxStatus');btn.disabled=true;status.textContent='Refreshing live FX…';try{const res=await fetch('https://api.frankfurter.app/latest?from=CNY');if(!res.ok)throw new Error('FX request failed');const data=await res.json();for(const c of CURRENCIES){if(c==='CNY'){settings.fx.CNY=1;continue}const cnyPerUnit=data.rates[c]?1/data.rates[c]:null;if(cnyPerUnit)settings.fx[c]=Number(cnyPerUnit.toFixed(4))}saveSettings();renderSettings();render();status.textContent=`Live FX refreshed ${new Date().toLocaleString()}.`}catch(err){status.textContent='Live FX refresh was unavailable. Your saved fallback rates were kept.'}finally{btn.disabled=false}});
+
+$('#accessTokenInput').value=accessToken;
+$('#saveTokenBtn').addEventListener('click',()=>{accessToken=$('#accessTokenInput').value.trim();localStorage.setItem('careerRadarAccessToken',accessToken);updateConnectionStatus('Access token saved in this browser.');loadCloudJobs();});
+$('#testConnectionBtn').addEventListener('click',async()=>{try{const d=await apiFetch('/api/health');cloudConnected=true;updateConnectionStatus(`Connected. Supabase: ${d.supabaseConfigured?'ready':'missing'} · OpenAI: ${d.openaiConfigured?'ready':'missing'} · Model: ${d.model}`);}catch(e){cloudConnected=false;updateConnectionStatus(`Connection failed: ${e.message}`);}});
+
+refreshLocationOptions();
+$('#calcCity').value='London';$('#calcCurrency').value='GBP';renderSettings();render();
+loadCloudJobs();
