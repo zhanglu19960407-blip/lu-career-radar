@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Lu Career Radar — operator-first job intelligence across CFO, CEO/GM and PE Operating Partner tracks." />
+  <meta name="theme-color" content="#10281c" />
+  <title>Lu Career Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">LR</div>
+        <div>
+          <div class="brand-title">Lu Career Radar</div>
+          <div class="brand-sub">Operator-first job intelligence</div>
+        </div>
+      </div>
+
+      <nav class="nav-section">
+        <button class="nav-item active" data-view="dashboard">Dashboard</button>
+        <button class="nav-item" data-view="pipeline">Application Pipeline</button>
+        <button class="nav-item" data-view="compensation">Compensation Lab</button>
+        <button class="nav-item" data-view="automation">Automation Setup</button>
+        <button class="nav-item" data-view="settings">Tax & FX Settings</button>
+      </nav>
+
+      <div class="sidebar-block">
+        <div class="sidebar-label">Career Tracks</div>
+        <label><input type="checkbox" class="track-filter" value="CFO" checked> CFO / Strategic Finance</label>
+        <label><input type="checkbox" class="track-filter" value="CEO/GM" checked> CEO / GM / P&L</label>
+        <label><input type="checkbox" class="track-filter" value="Operating Partner" checked> Operating Partner</label>
+      </div>
+
+      <div class="sidebar-block">
+        <div class="sidebar-label">Geographies</div>
+        <label><input type="checkbox" class="geo-filter" value="United Kingdom" checked> United Kingdom</label>
+        <label><input type="checkbox" class="geo-filter" value="Europe" checked> Europe</label>
+        <label><input type="checkbox" class="geo-filter" value="United States" checked> United States</label>
+        <label><input type="checkbox" class="geo-filter" value="Greater China" checked> Greater China</label>
+        <label><input type="checkbox" class="geo-filter" value="Middle East" checked> Middle East</label>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="tiny">Designed for roles that expand P&L, capital allocation, deal, and transformation ownership.</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Career Intelligence Dashboard</div>
+          <h1>Compare career upside and real take-home pay.</h1>
+        </div>
+        <div class="top-actions">
+          <button class="secondary-btn" id="exportBtn">Export data</button>
+          <button class="secondary-btn" id="importBtn">Import jobs</button>
+          <button class="primary-btn" id="addJobBtn">+ Add job</button>
+          <input type="file" id="fileInput" accept="application/json" hidden>
+        </div>
+      </header>
+
+      <section id="dashboardView" class="view active-view">
+        <div class="stats-grid">
+          <div class="stat-card"><span>Visible jobs</span><strong id="visibleCount">0</strong><small>Across selected regions & tracks</small></div>
+          <div class="stat-card"><span>Strong fits</span><strong id="strongFitCount">0</strong><small>Fit score ≥ 85</small></div>
+          <div class="stat-card"><span>Best net pay</span><strong id="bestNetPay">—</strong><small>Estimated annual take-home RMB</small></div>
+          <div class="stat-card"><span>Dead-end alerts</span><strong id="deadEndCount">0</strong><small>Risk score ≥ 4/5</small></div>
+        </div>
+
+        <div class="controls-card">
+          <div class="search-wrap"><input id="searchInput" type="text" placeholder="Search company, title, industry, or keyword..." /></div>
+          <select id="locationSelect"><option value="All">All locations</option></select>
+          <select id="sortSelect">
+            <option value="fit">Sort: Fit score</option>
+            <option value="netRmb">Sort: Net RMB</option>
+            <option value="career">Sort: Career upside</option>
+            <option value="pl">Sort: P&L exposure</option>
+            <option value="gross">Sort: Gross salary</option>
+          </select>
+        </div>
+
+        <div class="section-heading">
+          <div><div class="eyebrow">Opportunity Feed</div><h2>Prioritised jobs</h2></div>
+          <div class="legend"><span class="dot green"></span> Apply <span class="dot amber"></span> Stretch <span class="dot red"></span> Skip</div>
+        </div>
+        <div id="jobGrid" class="job-grid"></div>
+      </section>
+
+      <section id="pipelineView" class="view">
+        <div class="section-heading"><div><div class="eyebrow">Pipeline</div><h2>Your application workflow</h2></div></div>
+        <div class="pipeline-board" id="pipelineBoard"></div>
+      </section>
+
+      <section id="compensationView" class="view">
+        <div class="section-heading"><div><div class="eyebrow">Compensation Lab</div><h2>Normalise every offer into net RMB</h2></div></div>
+        <div class="comp-grid">
+          <div class="config-card">
+            <h3>Quick calculator</h3>
+            <div class="form-grid compact">
+              <label>City<select id="calcCity"></select></label>
+              <label>Currency<select id="calcCurrency"></select></label>
+              <label>Annual base salary<input id="calcSalary" type="number" value="100000" min="0"></label>
+              <label>Annual bonus<input id="calcBonus" type="number" value="0" min="0"></label>
+            </div>
+            <div class="result-panel" id="calcResult"></div>
+            <div class="note">Estimate only. Pension, equity, stock vesting, student loans, deductions, allowances, social-insurance caps and filing status can materially change take-home pay.</div>
+          </div>
+          <div class="config-card">
+            <h3>Comparison logic</h3>
+            <div class="score-row"><span>Gross local compensation</span><b>Input</b></div>
+            <div class="score-row"><span>Estimated local tax / NI / social charges</span><b>Deduct</b></div>
+            <div class="score-row"><span>Estimated local net</span><b>Convert</b></div>
+            <div class="score-row"><span>RMB FX rate</span><b>Apply</b></div>
+            <div class="score-row"><span>Annual + monthly take-home RMB</span><b>Compare</b></div>
+            <div class="note">UK roles use a 2026/27 England income-tax + employee National Insurance formula. Other markets use editable effective-tax presets in Settings so assumptions are visible and controllable.</div>
+          </div>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">Ranked by Take-home</div><h2>Cross-market compensation</h2></div></div>
+        <div class="table-wrap"><table id="compTable"><thead><tr><th>Role</th><th>Location</th><th>Gross midpoint</th><th>Est. net local</th><th>Est. net RMB / year</th><th>Est. net RMB / month</th><th>Tax model</th></tr></thead><tbody></tbody></table></div>
+      </section>
+
+      <section id="automationView" class="view">
+        <div class="section-heading"><div><div class="eyebrow">Automation</div><h2>Production system architecture</h2></div></div>
+        <div class="automation-grid">
+          <div class="flow-card">
+            <div class="flow-step"><b>1. Discover</b><span>Clay / job APIs / target-company career pages</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step"><b>2. Orchestrate</b><span>n8n daily workflow: fetch → normalize → dedupe → enrich</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step"><b>3. Score</b><span>OpenAI: track, fit, P&L, M&A, transformation, dead-end risk</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step"><b>4. Compensation</b><span>Normalize local salary → estimated net → RMB</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step"><b>5. Store</b><span>Supabase recommended; Airtable / Sheets also work</span></div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step"><b>6. Review</b><span>This dashboard + daily shortlist digest</span></div>
+          </div>
+          <div class="config-card">
+            <h3>Scoring logic</h3>
+            <div class="score-row"><span>Career optionality</span><b>25%</b></div>
+            <div class="score-row"><span>P&L / commercial ownership</span><b>20%</b></div>
+            <div class="score-row"><span>Senior leadership exposure</span><b>15%</b></div>
+            <div class="score-row"><span>M&A / capital allocation</span><b>15%</b></div>
+            <div class="score-row"><span>Transformation / value creation</span><b>15%</b></div>
+            <div class="score-row"><span>Brand / platform quality</span><b>10%</b></div>
+            <div class="note">Compensation is shown separately so a high-paying role does not automatically outrank a strategically better role.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="settingsView" class="view">
+        <div class="section-heading"><div><div class="eyebrow">Settings</div><h2>Tax & FX assumptions</h2></div><button class="secondary-btn" id="refreshFxBtn">Refresh live FX</button></div>
+        <div class="settings-grid">
+          <div class="config-card">
+            <h3>Cloud connection</h3>
+            <label>Access token<input id="accessTokenInput" type="password" placeholder="CAREER_RADAR_ACCESS_TOKEN"></label>
+            <div class="settings-actions"><button class="secondary-btn" id="testConnectionBtn" type="button">Test connection</button><button class="primary-btn" id="saveTokenBtn" type="button">Save token</button></div>
+            <div class="note" id="connectionStatus">Cloud mode is ready after you deploy and add the Vercel environment variables.</div>
+          </div>
+          <div class="config-card">
+            <h3>Currency → RMB</h3>
+            <div id="fxSettings"></div>
+            <div class="note" id="fxStatus">Fallback rates are editable. “Refresh live FX” attempts to pull current market rates from a public FX endpoint; if unavailable, your saved rates remain unchanged.</div>
+          </div>
+          <div class="config-card">
+            <h3>Effective tax presets</h3>
+            <div id="taxSettings"></div>
+            <div class="note">These presets are intentionally editable. For England, the dashboard ignores the preset and uses the built-in 2026/27 UK formula. For all other markets, the preset is an effective all-in estimate, not tax advice.</div>
+          </div>
+        </div>
+        <div class="settings-actions"><button class="secondary-btn" id="resetSettingsBtn">Reset defaults</button><button class="primary-btn" id="saveSettingsBtn">Save settings</button></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="jobDialog">
+    <form method="dialog" id="jobForm">
+      <div class="dialog-header"><h3>Add opportunity</h3><button value="cancel" class="icon-btn">×</button></div>
+      <div class="form-grid">
+        <label>Company<input name="company" required></label>
+        <label>Title<input name="title" required></label>
+        <label>City<input name="city" required></label>
+        <label>Geography<select name="geography"><option>United Kingdom</option><option>Europe</option><option>United States</option><option>Greater China</option><option>Middle East</option></select></label>
+        <label>Country<input name="country" placeholder="United Kingdom"></label>
+        <label>Currency<select name="currency" id="jobCurrency"></select></label>
+        <label>Track<select name="track"><option>CFO</option><option>CEO/GM</option><option>Operating Partner</option></select></label>
+        <label>Fit score<input name="fitScore" type="number" min="0" max="100" value="80"></label>
+        <label>Career upside (1-10)<input name="careerUpside" type="number" min="1" max="10" step="0.5" value="8"></label>
+        <label>P&L exposure (1-5)<input name="plExposure" type="number" min="1" max="5" value="3"></label>
+        <label>M&A exposure (1-5)<input name="maExposure" type="number" min="1" max="5" value="2"></label>
+        <label>Dead-end risk (1-5)<input name="deadEndRisk" type="number" min="1" max="5" value="2"></label>
+        <label>Salary min (local currency)<input name="salaryMin" type="number" value="80000"></label>
+        <label>Salary max (local currency)<input name="salaryMax" type="number" value="110000"></label>
+        <label>Bonus %<input name="bonusPct" type="number" min="0" max="500" value="0"></label>
+        <label class="full">Why it fits<textarea name="whyFit" rows="3"></textarea></label>
+        <label class="full">Main risk<textarea name="risk" rows="2"></textarea></label>
+        <label class="full">Job URL<input name="url" type="url"></label>
+        <label class="full">Job description<textarea name="jobDescription" rows="8" placeholder="Paste the JD here to enable AI scoring..."></textarea></label>
+      </div>
+      <div class="dialog-actions"><button value="cancel" class="secondary-btn">Cancel</button><button id="saveJobBtn" value="default" class="primary-btn">Save job</button><button id="scoreAndSaveBtn" value="default" class="primary-btn">AI score + save</button></div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
