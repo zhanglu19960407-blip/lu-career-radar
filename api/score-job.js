@@ -18,9 +18,11 @@ const schema = {
     jobDescriptionZh: { type: 'string' },
     salaryMin: { type: 'number', minimum: 0 },
     salaryMax: { type: 'number', minimum: 0 },
-    salaryCurrency: { type: 'string' }
+    salaryCurrency: { type: 'string' },
+    employmentType: { type: 'string', enum: ['Full-time','Internship','MBA Program','MBA Internship'] },
+    isMbaProgram: { type: 'boolean' }
   },
-  required: ['track','fitScore','careerUpside','plExposure','maExposure','transformationExposure','leadershipExposure','optionalityScore','deadEndRisk','recommendation','whyFit','risk','jobDescriptionZh','salaryMin','salaryMax','salaryCurrency']
+  required: ['track','fitScore','careerUpside','plExposure','maExposure','transformationExposure','leadershipExposure','optionalityScore','deadEndRisk','recommendation','whyFit','risk','jobDescriptionZh','salaryMin','salaryMax','salaryCurrency','employmentType','isMbaProgram']
 };
 
 export async function scoreJob(job) {
@@ -51,7 +53,7 @@ Calibration rules:
 - Do not invent sponsorship, responsibilities or facts absent from the JD.
 - For salary: if the JD explicitly states a range, use it. Otherwise provide a conservative annual base-salary market estimate for a comparable role at this seniority and location. Return the local currency code in salaryCurrency. This is a benchmark estimate, not a claim about the employer's actual pay.
 
-Write whyFit and risk in concise Simplified Chinese only.
+Classify employmentType as Full-time, Internship, MBA Program, or MBA Internship. MBA Program means a structured program explicitly targeted at MBA candidates/graduates; MBA Internship means an internship explicitly targeted at MBA candidates. Set isMbaProgram true for either MBA category. Do not infer MBA merely from seniority.\n\nWrite whyFit and risk in concise Simplified Chinese only.
 Translate the full job description faithfully into natural Simplified Chinese and return it as jobDescriptionZh. Preserve headings, bullets, requirements, benefits, numbers, currencies, product names and proper nouns. Do not summarize or omit material information.
 
 ROLE:
