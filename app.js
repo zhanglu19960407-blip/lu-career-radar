@@ -110,8 +110,7 @@ function filteredJobs(){
 function render(){
   refreshLocationOptions();
   const list=filteredJobs();
-  $('#visibleCount').textContent=list.length; $('#strongFitCount').textContent=list.filter(j=>j.fitScore>=85).length; $('#deadEndCount').textContent=list.filter(j=>j.deadEndRisk>=4).length;
-  $('#bestNetPay').textContent=list.length?rmb(Math.max(...list.map(netRmbForJob))):'—';
+  $('#visibleCount').textContent=list.length; $('#strongFitCount').textContent=list.filter(j=>j.fitScore>=85).length; if($('#highPotentialCount')) $('#highPotentialCount').textContent=list.filter(j=>j.careerUpside>=9).length;
   $('#jobGrid').innerHTML=list.map(j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
     <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · ${j.industry||'—'}</div></div><div class="score-pill">${j.fitScore}%<br><small>匹配度</small></div></div>
     <div class="tag-row"><span class="tag">${j.track}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
