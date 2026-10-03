@@ -18,3 +18,5 @@
 @media(max-width:600px){.job-grid{grid-template-columns:1fr}}
 
 #dashboardView,#jobGrid,.track-section{width:100%;max-width:none;min-width:0}.job-card{min-width:0;width:100%}
+
+.job-results{display:block;width:100%;max-width:none;min-width:0}.job-results>.track-section{display:block;width:100%}
