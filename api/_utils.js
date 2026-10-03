@@ -111,6 +111,7 @@ export function dbToClient(j) {
     url: j.url || '',
     source: j.source || '',
     jobDescription: j.job_description || '',
+    jobDescriptionZh: j.job_description_zh || '',
     createdAt: j.created_at
   };
 }
@@ -122,7 +123,7 @@ export function clientPatchToDb(j) {
     deadEndRisk:'dead_end_risk', transformationExposure:'transformation_exposure', leadershipExposure:'leadership_exposure',
     optionalityScore:'optionality_score', salaryMin:'salary_min', salaryMax:'salary_max', bonusPct:'bonus_pct',
     industry:'industry', whyFit:'why_fit', risk:'risk', recommendation:'recommendation', status:'status', url:'url',
-    source:'source', jobDescription:'job_description'
+    source:'source', jobDescription:'job_description', jobDescriptionZh:'job_description_zh'
   };
   const out = { updated_at: new Date().toISOString() };
   for (const [client, db] of Object.entries(map)) if (Object.prototype.hasOwnProperty.call(j, client)) out[db] = j[client];
@@ -158,6 +159,7 @@ export function clientToDb(j) {
     url: j.url || null,
     source: j.source || null,
     job_description: j.jobDescription ?? j.job_description ?? null,
+    job_description_zh: j.jobDescriptionZh ?? j.job_description_zh ?? null,
     updated_at: new Date().toISOString()
   };
 }
