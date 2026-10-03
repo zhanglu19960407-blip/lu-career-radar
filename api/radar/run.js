@@ -1,5 +1,4 @@
 import { cors, requireAccess, json, supabaseFetch, clientToDb, dbToClient } from '../_utils.js';
-import { scoreJob } from '../score-job.js';
 import { RADAR_SOURCES, isRelevantJob, classifyMarket } from '../../config/radar-sources.js';
 import { discoverOfficialJobs } from './web-discovery.js';
 
@@ -28,7 +27,7 @@ async function fetchLever(source) {
   return rows.map(x => {
     const location=x.categories?.location || '';
     return { company:source.company,title:x.text,location,...locationMeta(location),industry:'',
-      url:x.hostedUrl||x.applyUrl||'',source:`Lever:${source.board}`,
+      url:x.hostedUrl||x.applyUrl||'',source:`Lever:${source.board}`,postedAt:x.createdAt?new Date(x.createdAt).toISOString():null,
       jobDescription:[x.descriptionPlain,...(x.lists||[]).map(v=>`${v.text}: ${v.content}`)].filter(Boolean).join('\n\n') };
   });
 }
@@ -40,7 +39,7 @@ async function fetchAshby(source) {
   return (data.jobs||[]).map(x => {
     const location=x.location||'';
     return { company:source.company,title:x.title,location,...locationMeta(location),industry:'',
-      url:x.jobUrl||x.applyUrl||'',source:`Ashby:${source.board}`,jobDescription:x.descriptionPlain||x.description||'' };
+      url:x.jobUrl||x.applyUrl||'',source:`Ashby:${source.board}`,postedAt:x.publishedAt||x.createdAt||null,jobDescription:x.descriptionPlain||x.description||'' };
   });
 }
 
@@ -92,26 +91,16 @@ export default async function handler(req, res) {
     });
     const saved = [];
     const errors = [];
-    const scoreLimit = Math.max(0, Math.min(Number(maxScore) || 5, 10));
 
-    // Persist every fresh relevant job so the dashboard shows the full discovery set.
-    // Only the highest-priority subset receives expensive AI scoring in this run.
-    for (let i = 0; i < fresh.length; i++) {
-      const job = fresh[i];
+    // Discovery-first mode: persist every fresh relevant job immediately.
+    // AI scoring is intentionally disabled so it never limits visibility.
+    for (const job of fresh) {
       try {
-        let enriched = job;
-        if (i < scoreLimit && job.jobDescription) {
-          try {
-            enriched = { ...job, ...(await scoreJob(job)) };
-          } catch (scoreError) {
-            errors.push({ company: job.company, title: job.title, error: scoreError.message });
-          }
-        }
         const db = clientToDb({
-          ...enriched,
-          recommendation: enriched.recommendation || 'Stretch',
-          whyFit: enriched.whyFit || '已抓取，等待AI深度评估。',
-          risk: enriched.risk || '尚未完成AI深度评估。'
+          ...job,
+          recommendation: 'Stretch',
+          whyFit: null,
+          risk: null
         });
         const rows = await supabaseFetch('jobs?on_conflict=fingerprint', {
           method: 'POST', prefer: 'resolution=merge-duplicates,return=representation',
