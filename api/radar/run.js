@@ -1,35 +1,46 @@
 import { cors, requireAccess, json, supabaseFetch, clientToDb, dbToClient } from '../_utils.js';
 import { scoreJob } from '../score-job.js';
-import { RADAR_SOURCES, isRelevantJob } from '../../config/radar-sources.js';
+import { RADAR_SOURCES, isRelevantJob, classifyMarket } from '../../config/radar-sources.js';
+
+function locationMeta(location='') {
+  const market = classifyMarket(location);
+  const cityPatterns = [
+    ['London',/london/i],['Shanghai',/shanghai/i],['Beijing',/beijing/i],['Shenzhen',/shenzhen/i],
+    ['Guangzhou',/guangzhou/i],['Hangzhou',/hangzhou/i],['Chengdu',/chengdu/i],['Hong Kong',/hong kong|\bhk\b/i],
+    ['Singapore',/singapore/i],['Dubai',/dubai/i],['Abu Dhabi',/abu dhabi/i],['Riyadh',/riyadh/i],['Doha',/doha/i]
+  ];
+  const city = cityPatterns.find(([,p])=>p.test(location))?.[0] || location.split(/[\/,]/)[0].trim();
+  const country = market?.geography === 'UK' ? 'United Kingdom'
+    : market?.geography === 'Mainland China' ? 'China'
+    : market?.geography === 'Hong Kong' ? 'Hong Kong'
+    : market?.geography === 'Singapore' ? 'Singapore'
+    : /riyadh|saudi/i.test(location) ? 'Saudi Arabia'
+    : /doha|qatar/i.test(location) ? 'Qatar'
+    : market?.geography === 'Middle East' ? 'United Arab Emirates' : '';
+  return { city, country, geography: market?.geography || '', currency: market?.currency || 'USD' };
+}
 
 async function fetchLever(source) {
   const r = await fetch(`https://api.lever.co/v0/postings/${source.board}?mode=json`);
   if (!r.ok) throw new Error(`Lever ${source.board}: ${r.status}`);
   const rows = await r.json();
-  return rows.map(x => ({
-    company: source.company, title: x.text,
-    location: x.categories?.location || '',
-    city: /london/i.test(x.categories?.location || '') ? 'London' : '',
-    country: 'United Kingdom', geography: 'UK', currency: 'GBP',
-    industry: '', url: x.hostedUrl || x.applyUrl || '',
-    source: `Lever:${source.board}`,
-    jobDescription: [x.descriptionPlain, ...(x.lists || []).map(v => `${v.text}: ${v.content}`)].filter(Boolean).join('\n\n')
-  }));
+  return rows.map(x => {
+    const location=x.categories?.location || '';
+    return { company:source.company,title:x.text,location,...locationMeta(location),industry:'',
+      url:x.hostedUrl||x.applyUrl||'',source:`Lever:${source.board}`,
+      jobDescription:[x.descriptionPlain,...(x.lists||[]).map(v=>`${v.text}: ${v.content}`)].filter(Boolean).join('\n\n') };
+  });
 }
 
 async function fetchAshby(source) {
   const r = await fetch(`https://api.ashbyhq.com/posting-api/job-board/${source.board}?includeCompensation=true`);
   if (!r.ok) throw new Error(`Ashby ${source.board}: ${r.status}`);
-  const data = await r.json();
-  return (data.jobs || []).map(x => ({
-    company: source.company, title: x.title,
-    location: x.location || '',
-    city: /london/i.test(x.location || '') ? 'London' : '',
-    country: 'United Kingdom', geography: 'UK', currency: 'GBP',
-    industry: '', url: x.jobUrl || x.applyUrl || '',
-    source: `Ashby:${source.board}`,
-    jobDescription: x.descriptionPlain || x.description || ''
-  }));
+  const data=await r.json();
+  return (data.jobs||[]).map(x => {
+    const location=x.location||'';
+    return { company:source.company,title:x.title,location,...locationMeta(location),industry:'',
+      url:x.jobUrl||x.applyUrl||'',source:`Ashby:${source.board}`,jobDescription:x.descriptionPlain||x.description||'' };
+  });
 }
 
 export default async function handler(req, res) {
