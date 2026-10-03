@@ -53,3 +53,28 @@ async function upsertCloudJob(job){
 function updateConnectionStatus(msg){const el=document.querySelector('#connectionStatus');if(el)el.textContent=msg;}
 
 function salaryMid(j){return ((Number(j.salaryMin)||0)+(Number(j.salaryMax)||0))/2}
+function totalCashMid(j){return salaryMid(j)*(1+(Number(j.bonusPct)||0)/100)}
+function money(n,c='GBP'){try{return new Intl.NumberFormat('en-GB',{style:'currency',currency:c,maximumFractionDigits:0}).format(n||0)}catch{return `${c} ${Math.round(n||0).toLocaleString()}`}}
+function rmb(n){return `¥${Math.round(n||0).toLocaleString('zh-CN')}`}
+function recommendation(j){if(j.deadEndRisk>=4)return['Skip','rec-skip'];if(j.fitScore>=85&&j.careerUpside>=8)return['Apply','rec-apply'];return['Stretch','rec-stretch']}
+
+function ukEnglandNet(gross){
+  gross=Math.max(0,Number(gross)||0);
+  let allowance=12570;
+  if(gross>100000) allowance=Math.max(0,12570-(gross-100000)/2);
+  const taxable=Math.max(0,gross-allowance);
+  let incomeTax=0;
+  const basic=Math.min(taxable,37700); incomeTax+=basic*.20;
+  const higher=Math.min(Math.max(taxable-37700,0),125140-37700); incomeTax+=higher*.40;
+  const additional=Math.max(taxable-125140,0); incomeTax+=additional*.45;
+  const niBand=Math.max(0,Math.min(gross,50270)-12570);
+  const niHigh=Math.max(0,gross-50270);
+  const ni=niBand*.08+niHigh*.02;
+  return {net:Math.max(0,gross-incomeTax-ni),tax:incomeTax+ni,label:'UK 2026/27 formula'};
+}
+function taxKeyFor(j){return CITY_DEFAULTS[j.city]?.taxKey || (j.country==='United Kingdom'?'England':j.country)||'Other'}
+function netLocal(gross,j){
+  const key=taxKeyFor(j);
+  if(key==='England'&&j.currency==='GBP') return ukEnglandNet(gross);
+  const rate=settings.effectiveTax[key] ?? settings.effectiveTax.Other ?? .30;
+  return {net:gross*(1-rate),tax:gross*rate,label:`${key} ${(rate*100).toFixed(0)}% effective`};
