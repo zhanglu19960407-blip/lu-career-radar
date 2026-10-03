@@ -50,7 +50,7 @@ export const BRIDGE_TITLE_TERMS = [
   'corporate development manager','corporate development senior manager',
   'senior corporate development manager','m&a manager','senior m&a manager',
   'strategy & operations manager','strategy and operations manager',
-  'strategic finance','transformation','performance improvement'
+  'strategic finance','finance transformation','performance improvement'
 ];
 
 export const TARGET_MARKETS = [
