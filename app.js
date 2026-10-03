@@ -181,3 +181,5 @@ $('#testConnectionBtn').addEventListener('click',async()=>{try{const d=await api
 refreshLocationOptions();
 $('#calcCity').value='London';$('#calcCurrency').value='GBP';renderSettings();render();
 loadCloudJobs();
+
+// binding-fix-20261003-0431
