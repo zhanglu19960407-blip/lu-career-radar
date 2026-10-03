@@ -112,6 +112,8 @@ export function dbToClient(j) {
     source: j.source || '',
     jobDescription: j.job_description || '',
     jobDescriptionZh: j.job_description_zh || '',
+    employmentType: j.employment_type || 'Full-time',
+    isMbaProgram: Boolean(j.is_mba_program),
     createdAt: j.created_at
   };
 }
@@ -123,7 +125,7 @@ export function clientPatchToDb(j) {
     deadEndRisk:'dead_end_risk', transformationExposure:'transformation_exposure', leadershipExposure:'leadership_exposure',
     optionalityScore:'optionality_score', salaryMin:'salary_min', salaryMax:'salary_max', bonusPct:'bonus_pct',
     industry:'industry', whyFit:'why_fit', risk:'risk', recommendation:'recommendation', status:'status', url:'url',
-    source:'source', jobDescription:'job_description', jobDescriptionZh:'job_description_zh'
+    source:'source', jobDescription:'job_description', jobDescriptionZh:'job_description_zh', employmentType:'employment_type', isMbaProgram:'is_mba_program'
   };
   const out = { updated_at: new Date().toISOString() };
   for (const [client, db] of Object.entries(map)) if (Object.prototype.hasOwnProperty.call(j, client)) out[db] = j[client];
@@ -160,6 +162,8 @@ export function clientToDb(j) {
     source: j.source || null,
     job_description: j.jobDescription ?? j.job_description ?? null,
     job_description_zh: j.jobDescriptionZh ?? j.job_description_zh ?? null,
+    employment_type: j.employmentType ?? j.employment_type ?? null,
+    is_mba_program: Boolean(j.isMbaProgram ?? j.is_mba_program ?? false),
     updated_at: new Date().toISOString()
   };
 }
