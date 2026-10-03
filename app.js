@@ -57,6 +57,7 @@ function totalCashMid(j){return salaryMid(j)*(1+(Number(j.bonusPct)||0)/100)}
 function money(n,c='GBP'){try{return new Intl.NumberFormat('en-GB',{style:'currency',currency:c,maximumFractionDigits:0}).format(n||0)}catch{return `${c} ${Math.round(n||0).toLocaleString()}`}}
 function rmb(n){return `¥${Math.round(n||0).toLocaleString('zh-CN')}`}
 function statusZh(s){return ({Inbox:'待处理',Researching:'研究中',Shortlist:'候选名单',Applied:'已申请'})[s]||s}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function recommendation(j){if(j.deadEndRisk>=4)return['跳过','rec-skip'];if(j.fitScore>=85&&j.careerUpside>=8)return['申请','rec-apply'];return['挑战','rec-stretch']}
 
 function ukEnglandNet(gross){
@@ -116,6 +117,7 @@ function render(){
     <div class="tag-row"><span class="tag">${j.track}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
     <div class="money-strip"><div><span>预计年度税后收入</span><b>${rmb(nr)}</b></div><div><span>预计月度税后收入</span><b>${rmb(nr/12)}</b></div></div>
     <div class="job-copy"><b>匹配原因：</b> ${j.whyFit||'—'}<br><b>主要风险：</b> ${j.risk||'—'}</div>
+    ${j.jobDescription ? `<details class="job-description"><summary>查看职位描述（Job Description）</summary><div class="job-copy" style="white-space:pre-wrap;margin-top:10px">${escapeHtml(j.jobDescription)}</div></details>` : ''}
     <div class="metric-row"><div class="metric"><span>上升空间</span><b>${j.careerUpside}/10</b></div><div class="metric"><span>P&L</span><b>${j.plExposure}/5</b></div><div class="metric"><span>M&A</span><b>${j.maExposure}/5</b></div><div class="metric"><span>瓶颈风险</span><b>${j.deadEndRisk}/5</b></div></div>
     <div class="job-footer"><div class="recommendation ${cls}">${rec}</div><div class="job-actions"><button class="mini-btn" onclick='moveStatus(${JSON.stringify(String(j.id))})'>推进阶段</button>${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">打开职位</a>`:''}</div></div>
   </article>`}).join('')||'<div class="job-card">没有符合当前筛选条件的职位。</div>';
