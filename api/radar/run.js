@@ -66,7 +66,7 @@ export default async function handler(req, res) {
 
     let webDiscovery = { raw: 0, relevant: 0, error: null };
     try {
-      const webJobs = await discoverOfficialJobs({ maxCompanies: Number(req.body?.maxWebCompanies || 4) });
+      const webJobs = await discoverOfficialJobs({ maxCompanies: Number(req.body?.maxWebCompanies || 100) });
       webDiscovery.raw = webJobs.length;
       const normalizedWebJobs = webJobs.map(x => ({ ...x, ...locationMeta(x.location||''), source: x.source || 'Official Web Discovery' }));
       const relevantWebJobs = normalizedWebJobs.filter(x => isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
