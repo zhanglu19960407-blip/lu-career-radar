@@ -1,0 +1,19 @@
+{
+  "company": "string",
+  "title": "string",
+  "city": "string",
+  "geography": "United Kingdom | Europe | United States | Greater China | Middle East",
+  "track": "CFO | CEO/GM | Operating Partner",
+  "fitScore": "0-100",
+  "careerUpside": "1-10",
+  "plExposure": "1-5",
+  "maExposure": "1-5",
+  "deadEndRisk": "1-5",
+  "salaryMin": "annual base salary, normalized to GBP where possible",
+  "salaryMax": "annual base salary, normalized to GBP where possible",
+  "whyFit": "short explanation",
+  "risk": "main career risk",
+  "industry": "string",
+  "status": "Inbox | Researching | Shortlist | Applied",
+  "url": "job posting URL"
+}
