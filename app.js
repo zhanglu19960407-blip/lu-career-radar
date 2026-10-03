@@ -156,6 +156,7 @@ function render(){
   const cardHtml=j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
     <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · 发布 ${postedAgo(j.postedAt)} · 数据更新 ${postedAgo(j.updatedAt||j.createdAt)}</div></div></div>
     <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${ruleTrack(j)}</span></div>
+    ${(j.jobDescriptionZh||j.jobDescription) ? `<details class="job-description"><summary>查看职位描述（中文）</summary><div class="job-copy" style="white-space:pre-wrap;margin-top:10px">${escapeHtml(j.jobDescriptionZh||j.jobDescription)}</div></details>` : ''}
 
 
     <div class="job-footer"><div></div><div class="job-actions">${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">申请职位</a>`:''}</div></div>
