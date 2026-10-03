@@ -71,6 +71,7 @@ export default async function handler(req, res) {
       let batchSaved = 0;
       const webJobs = await discoverOfficialJobs({
         maxCompanies: Number(req.body?.maxWebCompanies || 150),
+        batchOnly: req.body?.webBatch === undefined ? null : Number(req.body.webBatch),
         onBatch: async ({batch,totalBatches,jobs}) => {
           const normalized = jobs.map(x=>({ ...x, ...locationMeta(x.location||''), source:x.source||'Official Web Discovery' }))
             .filter(x=>isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
