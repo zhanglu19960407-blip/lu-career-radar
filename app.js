@@ -128,17 +128,23 @@ function refreshDynamicFilters(){
   };
   make('#industryFilters','industry-filter',[...new Set(jobs.map(j=>j.industry||'其他'))].sort((a,b)=>a.localeCompare(b,'zh-CN')));
 }
+function ruleTrack(j){
+  if(j.track==='CFO'||j.track==='Operating Partner') return j.track;
+  const text=((j.title||'')+' '+(j.jobDescription||'')).toLowerCase();
+  const pe=['value creation','portfolio operations','portfolio finance','portfolio performance','private equity','operating team','performance improvement','transformation','corporate development','m&a','transaction','commercial due diligence','strategy & operations','strategy and operations'];
+  return pe.some(term=>text.includes(term)) ? 'Operating Partner' : 'CFO';
+}
 function filteredJobs(){
   const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
   const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
   const q=$('#searchInput')?.value?.toLowerCase().trim()||'', loc=$('#locationSelect')?.value||'All', employment=$('#employmentTypeSelect')?.value||'All';
-  let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography));
+  let list=jobs.filter(j=>tracks.has(ruleTrack(j))&&geos.has(j.geography));
   if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
   if(loc!=='All') list=list.filter(j=>j.city===loc);
   if(employment!=='All') list=list.filter(j=>inferEmploymentType(j)===employment);
   const sort=$('#sortSelect')?.value||'fit';
   const trackOrder={'CFO':0,'Operating Partner':1};
-  list.sort((a,b)=>(trackOrder[a.track]??9)-(trackOrder[b.track]??9)||(sort==='career'?b.careerUpside-a.careerUpside:sort==='pl'?b.plExposure-a.plExposure:sort==='gross'?totalCashMid(b)*(settings.fx[b.currency]||1)-totalCashMid(a)*(settings.fx[a.currency]||1):sort==='netRmb'?netRmbForJob(b)-netRmbForJob(a):b.fitScore-a.fitScore));
+  list.sort((a,b)=>(trackOrder[ruleTrack(a)]??9)-(trackOrder[ruleTrack(b)]??9)||(sort==='career'?b.careerUpside-a.careerUpside:sort==='pl'?b.plExposure-a.plExposure:sort==='gross'?totalCashMid(b)*(settings.fx[b.currency]||1)-totalCashMid(a)*(settings.fx[a.currency]||1):sort==='netRmb'?netRmbForJob(b)-netRmbForJob(a):b.fitScore-a.fitScore));
   return list;
 }
 function render(){
@@ -149,13 +155,13 @@ function render(){
   const trackOrder=['CFO','Operating Partner'];
   const cardHtml=j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
     <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · ${postedAgo(j.postedAt)}</div></div></div>
-    <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${j.track}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
+    <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${ruleTrack(j)}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
     <div class="money-strip"><div><span>市场薪酬参考</span><b>${(j.salaryMin||j.salaryMax) ? money(j.salaryMin,j.currency)+'–'+money(j.salaryMax,j.currency)+' / 年' : '待估算'}</b></div><div><span>预计税后人民币</span><b>${(j.salaryMin||j.salaryMax) ? rmb(nr)+' / 年' : '待估算'}</b></div></div>
     ${(j.jobDescriptionZh||j.jobDescription) ? `<details class="job-description"><summary>查看职位描述</summary><div class="job-copy" style="white-space:pre-wrap;margin-top:10px">${escapeHtml(j.jobDescriptionZh||j.jobDescription)}</div></details>` : ''}
     <div class="job-footer"><div class="recommendation ${cls}">${rec}</div><div class="job-actions"><button class="mini-btn" onclick='moveStatus(${JSON.stringify(String(j.id))})'>推进阶段</button>${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">申请职位</a>`:''}</div></div>
   </article>`};
   const grouped=trackOrder.map(track=>{
-    const trackJobs=list.filter(j=>j.track===track); if(!trackJobs.length)return '';
+    const trackJobs=list.filter(j=>ruleTrack(j)===track); if(!trackJobs.length)return '';
     return `<section class="track-section"><h2 class="track-heading">${trackLabels[track]} <span>${trackJobs.length}</span></h2><div class="job-grid">${trackJobs.map(cardHtml).join('')}</div></section>`;
   }).join('');
   $('#jobGrid').innerHTML=grouped||'<div class="job-card">没有符合当前筛选条件的职位。</div>';
