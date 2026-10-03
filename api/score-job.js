@@ -15,9 +15,12 @@ const schema = {
     recommendation: { type: 'string', enum: ['Apply','Stretch','Skip'] },
     whyFit: { type: 'string' },
     risk: { type: 'string' },
-    jobDescriptionZh: { type: 'string' }
+    jobDescriptionZh: { type: 'string' },
+    salaryMin: { type: 'number', minimum: 0 },
+    salaryMax: { type: 'number', minimum: 0 },
+    salaryCurrency: { type: 'string' }
   },
-  required: ['track','fitScore','careerUpside','plExposure','maExposure','transformationExposure','leadershipExposure','optionalityScore','deadEndRisk','recommendation','whyFit','risk','jobDescriptionZh']
+  required: ['track','fitScore','careerUpside','plExposure','maExposure','transformationExposure','leadershipExposure','optionalityScore','deadEndRisk','recommendation','whyFit','risk','jobDescriptionZh','salaryMin','salaryMax','salaryCurrency']
 };
 
 export async function scoreJob(job) {
@@ -45,7 +48,8 @@ Calibration rules:
 - For Operating Partner track, require transformation, value creation, portfolio/deal exposure or repeatable operating improvement.
 - careerUpside reflects what the role can unlock in 3-7 years; fitScore balances attainability and strategic increment.
 - Recommendation: Apply = strong realistic target; Stretch = strategically attractive but has a meaningful entry gap; Skip = too junior, low-increment, wrong-function, or materially unrealistic.
-- Do not invent salary, sponsorship, responsibilities or facts absent from the JD.
+- Do not invent sponsorship, responsibilities or facts absent from the JD.
+- For salary: if the JD explicitly states a range, use it. Otherwise provide a conservative annual base-salary market estimate for a comparable role at this seniority and location. Return the local currency code in salaryCurrency. This is a benchmark estimate, not a claim about the employer's actual pay.
 
 Write whyFit and risk in concise Simplified Chinese only.
 Translate the full job description faithfully into natural Simplified Chinese and return it as jobDescriptionZh. Preserve headings, bullets, requirements, benefits, numbers, currencies, product names and proper nouns. Do not summarize or omit material information.
