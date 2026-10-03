@@ -120,12 +120,12 @@ function filteredJobs(){
   const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
   const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
   const industries=new Set($$('.industry-filter:checked').map(x=>x.value));
-  const q=$('#searchInput').value.toLowerCase().trim(), loc=$('#locationSelect').value, employment=$('#employmentTypeSelect')?.value||'All';
+  const q=$('#searchInput')?.value?.toLowerCase().trim()||'', loc=$('#locationSelect')?.value||'All', employment=$('#employmentTypeSelect')?.value||'All';
   let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography)&&(!industries.size||industries.has(j.industry||'其他')));
   if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
   if(loc!=='All') list=list.filter(j=>j.city===loc);
   if(employment!=='All') list=list.filter(j=>inferEmploymentType(j)===employment);
-  const sort=$('#sortSelect').value;
+  const sort=$('#sortSelect')?.value||'fit';
   const trackOrder={'CFO':0,'Operating Partner':1};
   list.sort((a,b)=>(trackOrder[a.track]??9)-(trackOrder[b.track]??9)||(sort==='career'?b.careerUpside-a.careerUpside:sort==='pl'?b.plExposure-a.plExposure:sort==='gross'?totalCashMid(b)*(settings.fx[b.currency]||1)-totalCashMid(a)*(settings.fx[a.currency]||1):sort==='netRmb'?netRmbForJob(b)-netRmbForJob(a):b.fitScore-a.fitScore));
   return list;
@@ -133,7 +133,7 @@ function filteredJobs(){
 function render(){
   refreshLocationOptions();
   const list=filteredJobs();
-  $('#visibleCount').textContent=list.length; $('#strongFitCount').textContent=list.filter(j=>j.fitScore>=85).length; if($('#highPotentialCount')) $('#highPotentialCount').textContent=list.filter(j=>j.careerUpside>=9).length;
+  if($('#visibleCount')) $('#visibleCount').textContent=list.length; if($('#strongFitCount')) $('#strongFitCount').textContent=list.filter(j=>j.fitScore>=85).length; if($('#highPotentialCount')) $('#highPotentialCount').textContent=list.filter(j=>j.careerUpside>=9).length;
   const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向'};
   const trackOrder=['CFO','Operating Partner'];
   const cardHtml=j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
