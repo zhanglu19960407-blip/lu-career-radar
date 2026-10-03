@@ -25,9 +25,28 @@ export async function scoreJob(job) {
   const model = process.env.OPENAI_MODEL || 'gpt-6-astra';
   const prompt = `Evaluate this role for a finance-trained operator whose long-term paths are: (1) CFO / strategic finance leadership, (2) CEO / GM with direct P&L ownership, (3) PE Operating Partner / portfolio value creation.
 
-Prioritise career optionality, direct P&L/commercial ownership, pricing/revenue decisions, capital allocation, M&A, transformation/value creation, senior leadership exposure and platform quality. Penalise reporting-heavy FP&A, consolidation, accounting-heavy roles, narrow forecasting roles, and roles that merely repeat existing FP&A skills.
+Candidate baseline: Oxford MBA; prior FP&A Manager / team-lead level experience; enterprise planning, BI/data transformation, business reviews, supply-chain/operations finance, senior executive partnering and team leadership. She already has strong budgeting, forecasting, reporting and analytics experience.
 
-Fit score should reflect both current attainability and strategic fit. Career upside should reflect what the role can unlock in 3-7 years. Do not invent salary or facts absent from the JD.
+Score TWO dimensions mentally before producing fitScore:
+1) ATTAINABILITY NOW: seniority, required years, domain prerequisites, work-authorisation constraints explicitly stated in the JD, and whether the role is materially too junior or too senior.
+2) STRATEGIC INCREMENT: how much NEW career capital it adds beyond her existing FP&A toolkit.
+
+Prioritise direct P&L/commercial ownership, pricing/revenue/GTM decisions, capital allocation, M&A/corporate development, transformation/value creation, board/investor exposure, senior leadership access, people leadership and strong platform quality.
+
+Calibration rules:
+- A role can be easy to obtain but still score modestly if it mostly repeats budgeting/forecasting/reporting.
+- Penalise Analyst/Associate or explicitly early-career roles unless the scope is unusually ownership-heavy; do not reward a 'Strategic Finance' title by itself.
+- Penalise controllership, accounting, consolidation, tax, controls, finance-systems-only and reporting-heavy roles unless they clearly add a missing CFO-critical capability.
+- Reward roles where finance influences revenue, pricing, GTM, market entry, product investment, resource allocation, deals or a business-unit P&L.
+- Reward credible step-ups in scope (Senior Manager/Director/Head) only when requirements are realistically attainable; do not confuse prestige with fit.
+- For CFO track, value breadth across commercial finance + capital allocation + M&A + controllership/treasury exposure.
+- For CEO/GM track, require meaningful operating/commercial/P&L decision exposure.
+- For Operating Partner track, require transformation, value creation, portfolio/deal exposure or repeatable operating improvement.
+- careerUpside reflects what the role can unlock in 3-7 years; fitScore balances attainability and strategic increment.
+- Recommendation: Apply = strong realistic target; Stretch = strategically attractive but has a meaningful entry gap; Skip = too junior, low-increment, wrong-function, or materially unrealistic.
+- Do not invent salary, sponsorship, responsibilities or facts absent from the JD.
+
+For whyFit and risk, ALWAYS write bilingual text in this exact order: "中文：...\nEnglish: ...". Be concise and decision-useful.
 
 ROLE:
 Company: ${job.company || ''}
