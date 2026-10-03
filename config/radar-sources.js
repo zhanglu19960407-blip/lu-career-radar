@@ -7,7 +7,18 @@ export const RADAR_SOURCES = [
   { company: 'Binance', type: 'lever', board: 'binance', priority: 1 },
   { company: 'Airwallex', type: 'ashby', board: 'airwallex', priority: 1 },
   { company: 'Sentient', type: 'ashby', board: 'sentient', priority: 2 },
-  { company: 'Fi', type: 'lever', board: 'fi', priority: 2 }
+  { company: 'Fi', type: 'lever', board: 'fi', priority: 2 },
+  { company: 'Apollo Research', type: 'lever', board: 'apolloresearch', priority: 1 },
+  { company: 'Moneybox', type: 'lever', board: 'moneyboxapp', priority: 1 },
+  { company: 'Legend', type: 'lever', board: 'Legend', priority: 1 },
+  { company: 'CFGI', type: 'lever', board: 'cfgi', priority: 1 },
+  { company: 'Moonpig', type: 'lever', board: 'moonpig', priority: 2 },
+  { company: 'Mulberry', type: 'lever', board: 'mulberry', priority: 2 },
+  { company: 'Thought Machine', type: 'ashby', board: 'thought-machine', priority: 1 },
+  { company: 'Flagright', type: 'ashby', board: 'flagright.com', priority: 2 },
+  { company: 'Patch', type: 'ashby', board: 'patch.io', priority: 2 },
+  { company: 'Pave Bank', type: 'ashby', board: 'pavebank', priority: 2 },
+  { company: 'Aptura', type: 'ashby', board: 'aptura', priority: 2 }
 ];
 
 export const TITLE_TERMS = [
