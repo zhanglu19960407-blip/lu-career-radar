@@ -1,6 +1,7 @@
 import { cors, requireAccess, json, supabaseFetch, clientToDb, dbToClient } from '../_utils.js';
 import { scoreJob } from '../score-job.js';
 import { RADAR_SOURCES, isRelevantJob, classifyMarket } from '../../config/radar-sources.js';
+import { discoverOfficialJobs } from './web-discovery.js';
 
 function locationMeta(location='') {
   const market = classifyMarket(location);
@@ -64,6 +65,20 @@ export default async function handler(req, res) {
       } catch (e) { sourceErrors.push({ source: source.company, error: e.message }); }
     }
 
+    let webDiscovery = { raw: 0, relevant: 0, error: null };
+    try {
+      const webJobs = await discoverOfficialJobs({ maxCompanies: Number(req.body?.maxWebCompanies || 4) });
+      webDiscovery.raw = webJobs.length;
+      const normalizedWebJobs = webJobs.map(x => ({ ...x, ...locationMeta(x.location||''), source: x.source || 'Official Web Discovery' }));
+      const relevantWebJobs = normalizedWebJobs.filter(x => isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
+      webDiscovery.relevant = relevantWebJobs.length;
+      rawJobs.push(...normalizedWebJobs);
+      discovered.push(...relevantWebJobs);
+    } catch (e) {
+      webDiscovery.error = e.message;
+      console.warn('Official web discovery failed', e);
+    }
+
     const existing = await supabaseFetch('jobs?select=url,fingerprint&limit=5000');
     const urls = new Set(existing.map(x => x.url).filter(Boolean));
     const fresh = discovered.filter(x => /^https?:\/\//i.test(x.url||'') && !urls.has(x.url));
@@ -90,7 +105,7 @@ export default async function handler(req, res) {
       }
     }
 
-    const diagnostics={sources:RADAR_SOURCES.length,rawDiscovered:rawJobs.length,sourceStats,discovered:discovered.length,newCandidates:fresh.length,scoredAndSaved:saved.length,sourceErrors,errors};
+    const diagnostics={sources:RADAR_SOURCES.length,webDiscovery,rawDiscovered:rawJobs.length,sourceStats,discovered:discovered.length,newCandidates:fresh.length,scoredAndSaved:saved.length,sourceErrors,errors};
     console.log('Career Radar diagnostics', JSON.stringify(diagnostics));
     return json(res, 200, {
       ok: true, ...diagnostics,
