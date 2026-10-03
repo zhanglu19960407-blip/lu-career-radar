@@ -126,7 +126,7 @@ function filteredJobs(){
   if(loc!=='All') list=list.filter(j=>j.city===loc);
   if(employment!=='All') list=list.filter(j=>inferEmploymentType(j)===employment);
   const sort=$('#sortSelect').value;
-  const trackOrder={'CFO':0,'Operating Partner':1,'CEO/GM':2};
+  const trackOrder={'CFO':0,'Operating Partner':1};
   list.sort((a,b)=>(trackOrder[a.track]??9)-(trackOrder[b.track]??9)||(sort==='career'?b.careerUpside-a.careerUpside:sort==='pl'?b.plExposure-a.plExposure:sort==='gross'?totalCashMid(b)*(settings.fx[b.currency]||1)-totalCashMid(a)*(settings.fx[a.currency]||1):sort==='netRmb'?netRmbForJob(b)-netRmbForJob(a):b.fitScore-a.fitScore));
   return list;
 }
@@ -134,8 +134,8 @@ function render(){
   refreshLocationOptions();
   const list=filteredJobs();
   $('#visibleCount').textContent=list.length; $('#strongFitCount').textContent=list.filter(j=>j.fitScore>=85).length; if($('#highPotentialCount')) $('#highPotentialCount').textContent=list.filter(j=>j.careerUpside>=9).length;
-  const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向','CEO/GM':'CEO / GM 导向'};
-  const trackOrder=['CFO','Operating Partner','CEO/GM'];
+  const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向'};
+  const trackOrder=['CFO','Operating Partner'];
   const cardHtml=j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
     <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · ${j.industry||'—'}</div></div><div class="score-pill">${j.fitScore}%<br><small>匹配度</small></div></div>
     <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${j.track}</span><span class="tag">${money(j.salaryMin,j.currency)}–${money(j.salaryMax,j.currency)}</span><span class="tag">奖金 ${j.bonusPct||0}%</span><span class="tag">${statusZh(j.status||'Inbox')}</span></div>
