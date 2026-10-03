@@ -11,7 +11,7 @@ function parseJson(text=''){
 }
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
-export async function discoverOfficialJobs({maxCompanies=150,onBatch=null,rotation=0}={}){
+export async function discoverOfficialJobs({maxCompanies=150,onBatch=null,rotation=0,batchOnly=null}={}){
   const key=process.env.OPENAI_API_KEY;
   if(!key) throw new Error('Missing OPENAI_API_KEY');
   const model=process.env.OPENAI_MODEL || 'gpt-5.6-luna';
@@ -31,7 +31,8 @@ export async function discoverOfficialJobs({maxCompanies=150,onBatch=null,rotati
   for(let i=0;i<companies.length;i+=batchSize) companyBatches.push(companies.slice(i,i+batchSize));
   const allJobs=[];
   const batchErrors=[];
-  for(let batchIndex=0;batchIndex<companyBatches.length;batchIndex++){
+  const batchIndexes=batchOnly===null ? companyBatches.map((_,i)=>i) : [Math.max(0,Math.min(Number(batchOnly)||0,companyBatches.length-1))];
+  for(const batchIndex of batchIndexes){
   const batch=companyBatches[batchIndex];
   const companyText=batch.map(x=>`${x.company}: ${x.domains.join(', ')}`).join('\n');
   const prompt=`Find currently open jobs ONLY on the official career domains listed below.
@@ -82,7 +83,7 @@ jobDescription should be a concise factual summary of the official posting suffi
   }).map(j=>({...j,source:'Official Web Discovery'}));
   allJobs.push(...valid);
   if(onBatch) await onBatch({batch:batchIndex+1,totalBatches:companyBatches.length,companies:batch,jobs:valid});
-  if(batchIndex<companyBatches.length-1) await sleep(6500);
+  if(batchOnly===null && batchIndex<companyBatches.length-1) await sleep(6500);
   }
   const seen=new Set();
   const jobs=allJobs.filter(j=>{const k=j.url||`${j.company}|${j.title}|${j.location}`;if(seen.has(k))return false;seen.add(k);return true;});
