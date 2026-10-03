@@ -66,8 +66,28 @@ export default async function handler(req, res) {
 
     let webDiscovery = { raw: 0, relevant: 0, error: null };
     try {
-      const webJobs = await discoverOfficialJobs({ maxCompanies: Number(req.body?.maxWebCompanies || 100) });
+      const existingBeforeWeb = await supabaseFetch('jobs?select=url&limit=5000');
+      const knownWebUrls = new Set(existingBeforeWeb.map(x=>x.url).filter(Boolean));
+      let batchSaved = 0;
+      const webJobs = await discoverOfficialJobs({
+        maxCompanies: Number(req.body?.maxWebCompanies || 100),
+        onBatch: async ({batch,totalBatches,jobs}) => {
+          const normalized = jobs.map(x=>({ ...x, ...locationMeta(x.location||''), source:x.source||'Official Web Discovery' }))
+            .filter(x=>isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
+          for(const job of normalized){
+            if(knownWebUrls.has(job.url)) continue;
+            try{
+              const db=clientToDb({...job,recommendation:'Stretch',whyFit:null,risk:null});
+              await supabaseFetch('jobs?on_conflict=fingerprint',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify(db)});
+              knownWebUrls.add(job.url); batchSaved++;
+            }catch(e){ console.warn('Web batch save failed',batch,job.company,job.title,e.message); }
+          }
+          console.log('Career Radar web batch',JSON.stringify({batch,totalBatches,found:jobs.length,saved:batchSaved}));
+        }
+      });
       webDiscovery.raw = webJobs.length;
+      webDiscovery.batchErrors = webJobs.batchErrors || [];
+      webDiscovery.batchSaved = batchSaved;
       const normalizedWebJobs = webJobs.map(x => ({ ...x, ...locationMeta(x.location||''), source: x.source || 'Official Web Discovery' }));
       const relevantWebJobs = normalizedWebJobs.filter(x => isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
       webDiscovery.relevant = relevantWebJobs.length;
