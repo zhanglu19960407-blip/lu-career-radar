@@ -119,9 +119,8 @@ function refreshDynamicFilters(){
 function filteredJobs(){
   const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
   const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
-  const industries=new Set($$('.industry-filter:checked').map(x=>x.value));
   const q=$('#searchInput')?.value?.toLowerCase().trim()||'', loc=$('#locationSelect')?.value||'All', employment=$('#employmentTypeSelect')?.value||'All';
-  let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography)&&(!industries.size||industries.has(j.industry||'其他')));
+  let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography));
   if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
   if(loc!=='All') list=list.filter(j=>j.city===loc);
   if(employment!=='All') list=list.filter(j=>inferEmploymentType(j)===employment);
@@ -133,7 +132,7 @@ function filteredJobs(){
 function render(){
   refreshLocationOptions();
   const list=filteredJobs();
-  if($('#visibleCount')) $('#visibleCount').textContent=list.length; if($('#strongFitCount')) $('#strongFitCount').textContent=list.filter(j=>j.fitScore>=85).length; if($('#highPotentialCount')) $('#highPotentialCount').textContent=list.filter(j=>j.careerUpside>=9).length;
+  if($('#jobCount')) $('#jobCount').textContent=list.length;
   const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向'};
   const trackOrder=['CFO','Operating Partner'];
   const cardHtml=j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
@@ -146,8 +145,7 @@ function render(){
   </article>`};
   const grouped=trackOrder.map(track=>{
     const trackJobs=list.filter(j=>j.track===track); if(!trackJobs.length)return '';
-    const industries=[...new Set(trackJobs.map(j=>j.industry||'其他'))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
-    return `<section class="track-section"><h2 class="track-heading">${trackLabels[track]}</h2>${industries.map(industry=>`<section class="industry-section"><h3 class="industry-heading">${industry} <span>${trackJobs.filter(j=>(j.industry||'其他')===industry).length}</span></h3><div class="job-grid">${trackJobs.filter(j=>(j.industry||'其他')===industry).map(cardHtml).join('')}</div></section>`).join('')}</section>`;
+    return `<section class="track-section"><h2 class="track-heading">${trackLabels[track]} <span>${trackJobs.length}</span></h2><div class="job-grid">${trackJobs.map(cardHtml).join('')}</div></section>`;
   }).join('');
   $('#jobGrid').innerHTML=grouped||'<div class="job-card">没有符合当前筛选条件的职位。</div>';
   renderPipeline();renderCompTable();renderCalc();
