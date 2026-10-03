@@ -1,0 +1,3 @@
+{
+  "company":"string","title":"string","city":"string","country":"string","geography":"United Kingdom | Europe | United States | Greater China | Middle East","currency":"GBP | EUR | USD | CNY | HKD | AED | SAR | CHF | SGD","track":"CFO | CEO/GM | Operating Partner","fitScore":"0-100","careerUpside":"1-10","plExposure":"1-5","maExposure":"1-5","deadEndRisk":"1-5","salaryMin":"annual base salary in local currency","salaryMax":"annual base salary in local currency","bonusPct":"target annual cash bonus percentage","whyFit":"short explanation","risk":"main career risk","industry":"string","status":"Inbox | Researching | Shortlist | Applied","url":"job posting URL"
+}
