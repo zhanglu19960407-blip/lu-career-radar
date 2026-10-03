@@ -2,7 +2,7 @@ name: Daily Career Radar
 
 on:
   schedule:
-    - cron: '15 6 * * *'
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:
@@ -13,8 +13,10 @@ jobs:
         env:
           RADAR_ACCESS_TOKEN: ${{ secrets.RADAR_ACCESS_TOKEN }}
         run: |
-          curl --fail-with-body --retry 2 --max-time 300 \
-            -X POST "https://lu-career-radar.vercel.app/api/radar/run" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $RADAR_ACCESS_TOKEN" \
-            --data '{"maxWebCompanies":150}'
+          for batch in 0 1 2 3 4 5 6; do
+            curl --fail-with-body --retry 2 --max-time 300 \
+              -X POST "https://lu-career-radar.vercel.app/api/radar/run" \
+              -H "Content-Type: application/json" \
+              -H "x-career-radar-token: $RADAR_ACCESS_TOKEN" \
+              --data "{\"maxWebCompanies\":150,\"webBatch\":$batch}"
+          done
