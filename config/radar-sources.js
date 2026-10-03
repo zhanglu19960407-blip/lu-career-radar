@@ -18,7 +18,17 @@ export const RADAR_SOURCES = [
   { company: 'Flagright', type: 'ashby', board: 'flagright.com', priority: 2 },
   { company: 'Patch', type: 'ashby', board: 'patch.io', priority: 2 },
   { company: 'Pave Bank', type: 'ashby', board: 'pavebank', priority: 2 },
-  { company: 'Aptura', type: 'ashby', board: 'aptura', priority: 2 }
+  { company: 'Aptura', type: 'ashby', board: 'aptura', priority: 2 },
+  { company: 'MOO', type: 'lever', board: 'moo', priority: 1 },
+  { company: 'Zopa', type: 'lever', board: 'zopa', priority: 1 },
+  { company: 'Zeller', type: 'lever', board: 'Zeller', priority: 2 },
+  { company: 'Nium', type: 'lever', board: 'nium', priority: 1 },
+  { company: 'Sitetracker', type: 'lever', board: 'sitetracker', priority: 2 },
+  { company: '01Health', type: 'lever', board: '32Co', priority: 2 },
+  { company: 'Farfetch', type: 'lever', board: 'farfetch', priority: 1 },
+  { company: 'Xero', type: 'ashby', board: 'xero', priority: 1 },
+  { company: 'Checkout.com', type: 'ashby', board: 'checkout.com', priority: 1 },
+  { company: 'Capsa AI', type: 'ashby', board: 'capsa', priority: 1 }
 ];
 
 export const TITLE_TERMS = [
