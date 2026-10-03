@@ -6,7 +6,8 @@ export const RADAR_SOURCES = [
   { company: 'Reactive Markets', type: 'ashby', board: 'reactivemarkets', priority: 2 },
   { company: 'Binance', type: 'lever', board: 'binance', priority: 1 },
   { company: 'Airwallex', type: 'ashby', board: 'airwallex', priority: 1 },
-  { company: 'Sentient', type: 'ashby', board: 'sentient', priority: 2 }
+  { company: 'Sentient', type: 'ashby', board: 'sentient', priority: 2 },
+  { company: 'Fi', type: 'lever', board: 'fi', priority: 2 }
 ];
 
 export const TITLE_TERMS = [
