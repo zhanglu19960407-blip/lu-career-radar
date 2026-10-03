@@ -138,7 +138,7 @@ function filteredJobs(){
   const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
   const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
   const q=$('#searchInput')?.value?.toLowerCase().trim()||'', loc=$('#locationSelect')?.value||'All', employment=$('#employmentTypeSelect')?.value||'All';
-  let list=jobs.filter(j=>tracks.has(ruleTrack(j))&&geos.has(j.geography));
+  let list=jobs.filter(j=>tracks.has(ruleTrack(j)) && (!j.geography || geos.has(j.geography)));
   if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
   if(loc!=='All') list=list.filter(j=>j.city===loc);
   if(employment!=='All') list=list.filter(j=>inferEmploymentType(j)===employment);
