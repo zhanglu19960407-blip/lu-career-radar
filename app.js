@@ -139,9 +139,9 @@ function filteredJobs(){
   const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
   const q=$('#searchInput')?.value?.toLowerCase().trim()||'', loc=$('#locationSelect')?.value||'All', employment=$('#employmentTypeSelect')?.value||'All';
   let list=jobs;
-  if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
-  if(loc!=='All') list=list.filter(j=>j.city===loc);
-  if(employment!=='All') list=list.filter(j=>inferEmploymentType(j)===employment);
+  // diagnostic mode: no search filtering
+  // diagnostic mode: no location filtering
+  // diagnostic mode: no employment filtering
   const sort=$('#sortSelect')?.value||'fit';
   const trackOrder={'CFO':0,'Operating Partner':1};
   list.sort((a,b)=>(trackOrder[ruleTrack(a)]??9)-(trackOrder[ruleTrack(b)]??9)||(sort==='career'?b.careerUpside-a.careerUpside:sort==='pl'?b.plExposure-a.plExposure:sort==='gross'?totalCashMid(b)*(settings.fx[b.currency]||1)-totalCashMid(a)*(settings.fx[a.currency]||1):sort==='netRmb'?netRmbForJob(b)-netRmbForJob(a):b.fitScore-a.fitScore));
