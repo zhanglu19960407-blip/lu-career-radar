@@ -18,7 +18,8 @@ export const TITLE_TERMS = [
   'finance transformation','strategy & operations','strategy and operations','transformation',
   'business finance','strategic planning','business planning','commercial strategy',
   'business strategy','chief financial officer','cfo','general manager','business unit',
-  'pricing','revenue strategy','growth strategy','investment','capital allocation'
+  'pricing','revenue strategy','growth strategy','investment','capital allocation',
+  'mba','intern','internship','graduate program','graduate programme','leadership development','rotation','rotational','leadership program','leadership programme'
 ];
 
 export const TARGET_MARKETS = [
@@ -35,7 +36,9 @@ export function classifyMarket(location = '') {
 
 export function isRelevantJob(job) {
   const title = (job.title || '').toLowerCase();
+  const description = (job.jobDescription || '').toLowerCase();
   const location = job.location || '';
-  const titleMatch = TITLE_TERMS.some(term => title.includes(term));
-  return titleMatch && Boolean(classifyMarket(location));
+  const haystack = `${title} ${description}`;
+  const relevanceMatch = TITLE_TERMS.some(term => haystack.includes(term));
+  return relevanceMatch && Boolean(classifyMarket(location));
 }
