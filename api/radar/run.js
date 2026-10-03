@@ -2,14 +2,6 @@ import { cors, requireAccess, json, supabaseFetch, clientToDb, dbToClient } from
 import { RADAR_SOURCES, isRelevantJob, classifyMarket } from '../../config/radar-sources.js';
 import { discoverOfficialJobs } from './web-discovery.js';
 
-function isRecentPosting(job, days=30) {
-  if (!job.postedAt) return false;
-  const posted = new Date(job.postedAt).getTime();
-  if (!Number.isFinite(posted)) return false;
-  const age = Date.now() - posted;
-  return age >= 0 && age <= days * 86400000;
-}
-
 function locationMeta(location='') {
   const market = classifyMarket(location);
   const cityPatterns = [
@@ -66,7 +58,7 @@ export default async function handler(req, res) {
         const jobs = source.type === 'lever' ? await fetchLever(source) : await fetchAshby(source);
         rawJobs.push(...jobs);
         const marketJobs = jobs.filter(x=>Boolean(classifyMarket(x.location||'')));
-        const relevantJobs = jobs.filter(x=>isRelevantJob(x) && isRecentPosting(x,30) && /^https?:\/\//i.test(x.url||''));
+        const relevantJobs = jobs.filter(x=>isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
         discovered.push(...relevantJobs);
         sourceStats.push({source:source.company,raw:jobs.length,market:marketJobs.length,relevant:relevantJobs.length});
       } catch (e) { sourceErrors.push({ source: source.company, error: e.message }); }
@@ -81,7 +73,7 @@ export default async function handler(req, res) {
         maxCompanies: Number(req.body?.maxWebCompanies || 150),
         onBatch: async ({batch,totalBatches,jobs}) => {
           const normalized = jobs.map(x=>({ ...x, ...locationMeta(x.location||''), source:x.source||'Official Web Discovery' }))
-            .filter(x=>isRelevantJob(x) && isRecentPosting(x,30) && /^https?:\/\//i.test(x.url||''));
+            .filter(x=>isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
           for(const job of normalized){
             if(knownWebUrls.has(job.url)) continue;
             try{
@@ -97,7 +89,7 @@ export default async function handler(req, res) {
       webDiscovery.batchErrors = webJobs.batchErrors || [];
       webDiscovery.batchSaved = batchSaved;
       const normalizedWebJobs = webJobs.map(x => ({ ...x, ...locationMeta(x.location||''), source: x.source || 'Official Web Discovery' }));
-      const relevantWebJobs = normalizedWebJobs.filter(x => isRelevantJob(x) && isRecentPosting(x,30) && /^https?:\/\//i.test(x.url||''));
+      const relevantWebJobs = normalizedWebJobs.filter(x => isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
       webDiscovery.relevant = relevantWebJobs.length;
       rawJobs.push(...normalizedWebJobs);
       discovered.push(...relevantWebJobs);
