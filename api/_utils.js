@@ -51,10 +51,23 @@ function supabaseHeaders(prefer) {
 
 export async function supabaseFetch(path, options = {}) {
   const { url } = supabaseConfig();
-  const resp = await fetch(`${url}/rest/v1/${path}`, {
-    ...options,
-    headers: { ...supabaseHeaders(options.prefer), ...(options.headers || {}) }
-  });
+  let resp;
+  try {
+    resp = await fetch(`${url}/rest/v1/${path}`, {
+      ...options,
+      headers: { ...supabaseHeaders(options.prefer), ...(options.headers || {}) }
+    });
+  } catch (e) {
+    let hostname = 'invalid-url';
+    try { hostname = new URL(url).hostname; } catch {}
+    console.error('Supabase fetch transport failure', {
+      hostname,
+      error: e?.message || String(e),
+      causeCode: e?.cause?.code || null,
+      causeMessage: e?.cause?.message || null
+    });
+    throw e;
+  }
   const text = await resp.text();
   let data = null;
   if (text) { try { data = JSON.parse(text); } catch { data = text; } }
