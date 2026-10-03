@@ -186,7 +186,16 @@ $('#runRadarBtn')?.addEventListener('click',async e=>{
   const original=btn.textContent;
   btn.disabled=true; btn.textContent='正在抓取职位…';
   try{
-    const data=await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({})});
+    let discoveredTotal=0, newTotal=0;
+    // Run each official-web batch as an independent request so no single Vercel
+    // function has to scan the whole company universe within its time limit.
+    for(let webBatch=0;webBatch<7;webBatch++){
+      btn.textContent=`正在抓取职位… ${webBatch+1}/7`;
+      const data=await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({maxWebCompanies:150,webBatch})});
+      discoveredTotal+=Number(data.discovered||0);
+      newTotal+=Number(data.newCandidates||0);
+    }
+    const data={discovered:discoveredTotal,newCandidates:newTotal};
     const cloud=await apiFetch('/api/jobs');
     jobs=Array.isArray(cloud.jobs)?cloud.jobs.map(normalizeJob):jobs;
     save(); render();
