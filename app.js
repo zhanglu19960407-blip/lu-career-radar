@@ -111,7 +111,7 @@ function refreshLocationOptions(){
   const cities=[...new Set([...Object.keys(CITY_DEFAULTS),...jobs.map(j=>j.city).filter(Boolean)])].sort();
   const cur=$('#locationSelect')?.value||'All';
   if($('#locationSelect')) $('#locationSelect').innerHTML='<option value="All">全部地点</option>'+cities.map(c=>`<option>${c}</option>`).join('');
-  if(cities.includes(cur)||cur==='All') $('#locationSelect').value=cur;
+  if($('#locationSelect') && (cities.includes(cur)||cur==='All')) $('#locationSelect').value=cur;
   const opts=cities.map(c=>`<option>${c}</option>`).join('');
   if($('#calcCity')) $('#calcCity').innerHTML=opts;
   const currOpts=CURRENCIES.map(c=>`<option>${c}</option>`).join('');
