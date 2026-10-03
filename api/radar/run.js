@@ -92,11 +92,27 @@ export default async function handler(req, res) {
     });
     const saved = [];
     const errors = [];
+    const scoreLimit = Math.max(0, Math.min(Number(maxScore) || 5, 10));
 
-    for (const job of fresh.slice(0, maxScore)) {
+    // Persist every fresh relevant job so the dashboard shows the full discovery set.
+    // Only the highest-priority subset receives expensive AI scoring in this run.
+    for (let i = 0; i < fresh.length; i++) {
+      const job = fresh[i];
       try {
-        const scored = job.jobDescription ? await scoreJob(job) : {};
-        const db = clientToDb({ ...job, ...scored });
+        let enriched = job;
+        if (i < scoreLimit && job.jobDescription) {
+          try {
+            enriched = { ...job, ...(await scoreJob(job)) };
+          } catch (scoreError) {
+            errors.push({ company: job.company, title: job.title, error: scoreError.message });
+          }
+        }
+        const db = clientToDb({
+          ...enriched,
+          recommendation: enriched.recommendation || 'Stretch',
+          whyFit: enriched.whyFit || '已抓取，等待AI深度评估。',
+          risk: enriched.risk || '尚未完成AI深度评估。'
+        });
         const rows = await supabaseFetch('jobs?on_conflict=fingerprint', {
           method: 'POST', prefer: 'resolution=merge-duplicates,return=representation',
           body: JSON.stringify(db)
@@ -104,12 +120,6 @@ export default async function handler(req, res) {
         if (rows?.[0]) saved.push(dbToClient(rows[0]));
       } catch (e) {
         errors.push({ company: job.company, title: job.title, error: e.message });
-        const fallback = clientToDb({ ...job, recommendation: 'Stretch', whyFit: '职位已成功抓取，AI评分稍后补充。', risk: '尚未完成AI评估。' });
-        const rows = await supabaseFetch('jobs?on_conflict=fingerprint', {
-          method: 'POST', prefer: 'resolution=merge-duplicates,return=representation',
-          body: JSON.stringify(fallback)
-        });
-        if (rows?.[0]) saved.push(dbToClient(rows[0]));
       }
     }
 
