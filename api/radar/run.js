@@ -43,6 +43,21 @@ async function fetchAshby(source) {
   });
 }
 
+async function translateJobDescription(job){
+  const text=String(job.jobDescription||'').trim();
+  if(!text) return '';
+  const key=process.env.OPENAI_API_KEY;
+  if(!key) return '';
+  const r=await fetch('https://api.openai.com/v1/responses',{
+    method:'POST',
+    headers:{authorization:`Bearer ${key}`,'content-type':'application/json'},
+    body:JSON.stringify({model:process.env.OPENAI_MODEL||'gpt-5.6-luna',input:`Translate the following job description faithfully into concise, natural Simplified Chinese. Preserve headings, bullets, requirements, numbers, currencies, product names and proper nouns. Do not add commentary.\n\n${text}`})
+  });
+  if(!r.ok) return '';
+  const data=await r.json();
+  return data.output_text||(data.output||[]).flatMap(x=>x.content||[]).find(x=>x.type==='output_text')?.text||'';
+}
+
 export default async function handler(req, res) {
   if (cors(req, res)) return;
   if (!requireAccess(req, res)) return;
@@ -78,7 +93,8 @@ export default async function handler(req, res) {
           for(const job of normalized){
             if(knownWebUrls.has(job.url)) continue;
             try{
-              const db=clientToDb({...job,recommendation:'Stretch',whyFit:null,risk:null});
+              const jobDescriptionZh=await translateJobDescription(job);
+              const db=clientToDb({...job,jobDescriptionZh,recommendation:'Stretch',whyFit:null,risk:null});
               await supabaseFetch('jobs?on_conflict=fingerprint',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify(db)});
               knownWebUrls.add(job.url); batchSaved++;
             }catch(e){ console.warn('Web batch save failed',batch,job.company,job.title,e.message); }
@@ -117,8 +133,10 @@ export default async function handler(req, res) {
     // AI scoring is intentionally disabled so it never limits visibility.
     for (const job of fresh) {
       try {
+        const jobDescriptionZh = await translateJobDescription(job);
         const db = clientToDb({
           ...job,
+          jobDescriptionZh,
           recommendation: 'Stretch',
           whyFit: null,
           risk: null
