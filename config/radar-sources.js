@@ -31,16 +31,18 @@ export const RADAR_SOURCES = [
   { company: 'Capsa AI', type: 'ashby', board: 'capsa', priority: 1 }
 ];
 
-export const TITLE_TERMS = [
-  'strategic finance','finance strategy','finance & strategy','finance and strategy',
-  'fp&a','financial planning','finance business partner','commercial finance',
-  'corporate finance','corporate development','m&a','value creation',
-  'portfolio finance','finance director','head of finance','finance manager',
-  'finance transformation','strategy & operations','strategy and operations','transformation',
-  'business finance','strategic planning','business planning','commercial strategy',
-  'business strategy','chief financial officer','cfo','general manager','business unit',
-  'pricing','revenue strategy','growth strategy','investment','capital allocation',
-  'mba','intern','internship','graduate program','graduate programme','leadership development','rotation','rotational','leadership program','leadership programme'
+export const CFO_TITLE_TERMS = [
+  'finance','fp&a','financial planning','business partner','commercial finance',
+  'strategic finance','corporate finance','corporate development','m&a',
+  'treasury','capital allocation','investment','pricing','revenue','business finance',
+  'financial strategy','strategic planning','business planning'
+];
+
+export const PE_TITLE_TERMS = [
+  'value creation','portfolio operations','portfolio finance','portfolio performance',
+  'private equity','operating team','performance improvement','transformation',
+  'corporate development','m&a','deal','transaction','commercial due diligence',
+  'strategy & operations','strategy and operations'
 ];
 
 export const TARGET_MARKETS = [
