@@ -109,19 +109,19 @@ function refreshLocationOptions(){
 function refreshDynamicFilters(){
   const make=(id,cls,values)=>{
     const box=$(id); if(!box)return;
-    const previous=new Set($('.'+cls+':checked').map(x=>x.value));
+    const previous=new Set($$('.'+cls+':checked').map(x=>x.value));
     const first=!box.children.length;
     box.innerHTML=values.map(v=>`<label><input type="checkbox" class="${cls}" value="${escapeHtml(v)}" ${first||previous.has(v)?'checked':''}> ${escapeHtml(v)}</label>`).join('');
-    $('.'+cls).forEach(el=>el.addEventListener('change',render));
+    $$('.'+cls).forEach(el=>el.addEventListener('change',render));
   };
   make('#industryFilters','industry-filter',[...new Set(jobs.map(j=>j.industry||'其他'))].sort((a,b)=>a.localeCompare(b,'zh-CN')));
   make('#titleFilters','title-filter',[...new Set(jobs.map(j=>j.title).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en')));
 }
 function filteredJobs(){
-  const tracks=new Set($('.track-filter:checked').map(x=>x.value));
-  const geos=new Set($('.geo-filter:checked').map(x=>x.value));
-  const industries=new Set($('.industry-filter:checked').map(x=>x.value));
-  const titles=new Set($('.title-filter:checked').map(x=>x.value));
+  const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
+  const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
+  const industries=new Set($$('.industry-filter:checked').map(x=>x.value));
+  const titles=new Set($$('.title-filter:checked').map(x=>x.value));
   const q=$('#searchInput').value.toLowerCase().trim(), loc=$('#locationSelect').value, employment=$('#employmentTypeSelect')?.value||'All';
   let list=jobs.filter(j=>tracks.has(j.track)&&geos.has(j.geography)&&(!industries.size||industries.has(j.industry||'其他'))&&(!titles.size||titles.has(j.title)));
   if(q) list=list.filter(j=>[j.company,j.title,j.city,j.country,j.industry,j.whyFit,j.track].join(' ').toLowerCase().includes(q));
@@ -200,9 +200,9 @@ $('#accessTokenInput').value=accessToken;
 $('#saveTokenBtn').addEventListener('click',()=>{accessToken=$('#accessTokenInput').value.trim();localStorage.setItem('careerRadarAccessToken',accessToken);updateConnectionStatus('访问令牌已保存到当前浏览器。');loadCloudJobs();});
 $('#testConnectionBtn').addEventListener('click',async()=>{try{const d=await apiFetch('/api/health');cloudConnected=true;updateConnectionStatus(`连接成功。Supabase：${d.supabaseConfigured?'就绪':'缺失'} · OpenAI：${d.openaiConfigured?'就绪':'缺失'} · 模型：${d.model}`);}catch(e){cloudConnected=false;updateConnectionStatus(`连接失败：${e.message}`);}});
 
-$('.filter-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+$$('.filter-toggle').forEach(btn=>btn.addEventListener('click',()=>{
   const checked=btn.dataset.check==='true';
-  $('.'+btn.dataset.target).forEach(el=>el.checked=checked);
+  $$('.'+btn.dataset.target).forEach(el=>el.checked=checked);
   render();
 }));
 refreshLocationOptions();
