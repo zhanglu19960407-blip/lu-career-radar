@@ -49,6 +49,36 @@
       </header>
 
       <section id="dashboardView" class="view active-view">
+        <div class="filter-panel">
+          <div class="filter-group"><span>地区</span><div class="filter-options"><button type="button" class="filter-toggle" data-target="geo-filter" data-check="true">全选</button><button type="button" class="filter-toggle" data-target="geo-filter" data-check="false">全不选</button>
+            <label><input type="checkbox" class="geo-filter" value="UK" checked> 英国</label><label><input type="checkbox" class="geo-filter" value="Mainland China" checked> 中国大陆</label><label><input type="checkbox" class="geo-filter" value="Hong Kong" checked> 香港</label><label><input type="checkbox" class="geo-filter" value="Singapore" checked> 新加坡</label><label><input type="checkbox" class="geo-filter" value="Middle East" checked> 中东</label>
+          </div></div>
+          <div class="filter-group"><span>职业方向</span><div class="filter-options"><button type="button" class="filter-toggle" data-target="track-filter" data-check="true">全选</button><button type="button" class="filter-toggle" data-target="track-filter" data-check="false">全不选</button>
+            <label><input type="checkbox" class="track-filter" value="CFO" checked> CFO</label><label><input type="checkbox" class="track-filter" value="Operating Partner" checked> PE 价值创造</label>
+          </div></div>
+          <div class="filter-group"><span>行业</span><div class="filter-options"><button type="button" class="filter-toggle" data-target="industry-filter" data-check="true">全选</button><button type="button" class="filter-toggle" data-target="industry-filter" data-check="false">全不选</button><span id="industryFilters" class="filter-options dynamic-options"></span></div></div>
+        </div>
+
+        <div class="controls-card">
+          <div class="search-wrap"><input id="searchInput" type="text" placeholder="搜索公司、职位、行业或关键词..." /></div>
+          <select id="employmentTypeSelect">
+            <option value="All">全部类型</option>
+            <option value="Full-time">全职</option>
+            <option value="Internship">实习</option>
+            <option value="MBA Program">MBA 项目</option>
+            <option value="MBA Internship">MBA 实习</option>
+          </select>
+          <select id="locationSelect"><option value="All">全部地点</option></select>
+          <select id="sortSelect">
+            <option value="fit">排序：匹配度</option>
+            <option value="career">排序：职业上升空间</option>
+          </select>
+        </div>
+
+        <div class="section-heading">
+          <div><div class="eyebrow">优先处理</div><h2>最值得关注的职位</h2></div>
+        </div>
+        <div id="jobGrid" class="job-grid"></div>
       </section>
 
       <section id="pipelineView" class="view">
