@@ -163,9 +163,13 @@ function render(){
 
     <div class="job-footer"><div></div><div class="job-actions">${j.url&&j.url!=='#'?`<a class="mini-btn" href="${j.url}" target="_blank" rel="noopener">申请职位</a>`:''}</div></div>
   </article>`};
-  const grouped=trackOrder.map(track=>{
-    const trackJobs=list.filter(j=>ruleTrack(j)===track); if(!trackJobs.length)return '';
-    return `<section class="track-section"><h2 class="track-heading">${trackLabels[track]} <span>${trackJobs.length}</span></h2><div class="job-grid">${trackJobs.map(cardHtml).join('')}</div></section>`;
+  const statusSections=[
+    ['Interested','⭐ 感兴趣'],['Applied','✅ 已投递'],['NoResponse','⏳ 未回应'],
+    ['Interviewing','🎯 面试中'],['Rejected','❌ 失败'],['NotInterested','🚫 不感兴趣'],['Inbox','待处理']
+  ];
+  const grouped=statusSections.map(([status,label])=>{
+    const sectionJobs=list.filter(j=>(j.status||'Inbox')===status); if(!sectionJobs.length)return '';
+    return `<section class="track-section status-section" data-status-section="${status}"><h2 class="track-heading">${label} <span>${sectionJobs.length}</span></h2><div class="job-grid">${sectionJobs.map(cardHtml).join('')}</div></section>`;
   }).join('');
   $('#jobGrid').innerHTML=grouped||'<div class="job-card">没有符合当前筛选条件的职位。</div>';
   renderStatusCounts();renderPipeline();renderCompTable();renderCalc();
