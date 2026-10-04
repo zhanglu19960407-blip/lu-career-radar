@@ -1,22 +1,38 @@
-name: Daily Career Radar
+name: Twice Daily Career Radar
 
 on:
   schedule:
-    - cron: '0 8 * * *'
+    # Run at both possible UTC equivalents of 08:00/20:00 London time.
+    # The timezone guard below ensures exactly two runs per London calendar day
+    # across both GMT and BST.
+    - cron: '0 7,8,19,20 * * *'
   workflow_dispatch:
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      - name: Check London schedule
+        id: london_time
+        shell: bash
+        run: |
+          HOUR=$(TZ=Europe/London date +%H)
+          if [[ "$HOUR" == "08" || "$HOUR" == "20" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Trigger production radar
+        if: steps.london_time.outputs.run == 'true'
         env:
           RADAR_ACCESS_TOKEN: ${{ secrets.RADAR_ACCESS_TOKEN }}
         run: |
           for batch in $(seq 0 39); do
+            echo "Running Career Radar batch $((batch+1))/40"
             curl --fail-with-body --retry 2 --max-time 300 \
               -X POST "https://lu-career-radar.vercel.app/api/radar/run" \
               -H "Content-Type: application/json" \
               -H "x-career-radar-token: $RADAR_ACCESS_TOKEN" \
-              --data "{\"maxWebCompanies\":150,\"webBatch\":$batch}"
+              --data "{\"maxWebCompanies\":200,\"webBatch\":$batch}"
           done
