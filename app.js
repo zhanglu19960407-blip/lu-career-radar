@@ -149,7 +149,7 @@ function filteredJobs(){
 }
 function render(){
   refreshLocationOptions();
-  const activeStatus=$('#statusFilter')?.value||'All';
+  const activeStatus=$('#statusFilters')?.dataset.active||'All';
   const list=[...jobs].filter(j=>activeStatus==='All'||(j.status||'Inbox')===activeStatus);
   if($('#jobCount')) $('#jobCount').textContent=list.length;
   const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向'};
@@ -174,9 +174,9 @@ function render(){
 function renderStatusCounts(){
   const defs=[['All','全部'],['Inbox','待处理'],['Interested','感兴趣'],['Applied','已投递'],['Interviewing','面试中'],['NotInterested','不感兴趣']];
   const box=$('#statusFilters'); if(!box)return;
-  const current=$('#statusFilter')?.value||'All';
-  box.innerHTML='<select id="statusFilter">'+defs.map(([v,label])=>`<option value="${v}" ${current===v?'selected':''}>${label} ${v==='All'?jobs.length:jobs.filter(j=>(j.status||'Inbox')===v).length}</option>`).join('')+'</select>';
-  $('#statusFilter').addEventListener('change',render);
+  const current=box.dataset.active||'All';
+  box.innerHTML=defs.map(([v,label])=>`<button type="button" class="status-chip ${current===v?'active':''}" data-status="${v}"><span>${label}</span><strong>${v==='All'?jobs.length:jobs.filter(j=>(j.status||'Inbox')===v).length}</strong></button>`).join('');
+  $$('.status-chip').forEach(btn=>btn.addEventListener('click',()=>{box.dataset.active=btn.dataset.status;render();}));
 }
 async function setJobStatus(id,status){
   const j=jobs.find(x=>String(x.id)===String(id)); if(!j)return;
