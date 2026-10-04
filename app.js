@@ -56,7 +56,7 @@ function salaryMid(j){return ((Number(j.salaryMin)||0)+(Number(j.salaryMax)||0))
 function totalCashMid(j){return salaryMid(j)*(1+(Number(j.bonusPct)||0)/100)}
 function money(n,c='GBP'){try{return new Intl.NumberFormat('en-GB',{style:'currency',currency:c,maximumFractionDigits:0}).format(n||0)}catch{return `${c} ${Math.round(n||0).toLocaleString()}`}}
 function rmb(n){return `¥${Math.round(n||0).toLocaleString('zh-CN')}`}
-function statusZh(s){return ({Inbox:'待处理',Interested:'感兴趣',Applied:'已投递',NoResponse:'未回应',Interviewing:'面试中',NotInterested:'不感兴趣',Researching:'感兴趣',Shortlist:'感兴趣'})[s]||s}
+function statusZh(s){return ({Inbox:'待处理',Interested:'感兴趣',Applied:'已投递',NoResponse:'未回应',Interviewing:'面试中',Rejected:'失败',NotInterested:'不感兴趣',Researching:'感兴趣',Shortlist:'感兴趣'})[s]||s}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function recommendation(j){if(j.deadEndRisk>=4)return['跳过','rec-skip'];if(j.fitScore>=85&&j.careerUpside>=8)return['申请','rec-apply'];return['挑战','rec-stretch']}
 
@@ -157,7 +157,7 @@ function render(){
   const cardHtml=j=>{const [rec,cls]=recommendation(j), gross=totalCashMid(j), n=netLocal(gross,j), nr=n.net*(settings.fx[j.currency]||1);return `<article class="job-card">
     <div class="job-top"><div><div class="job-company">${j.company}</div><div class="job-title">${j.title}</div><div class="job-meta">${j.city} · ${j.country||j.geography} · 发布 ${postedAgo(j.postedAt)} · 数据更新 ${postedAgo(j.updatedAt||j.createdAt)}</div></div></div>
     <div class="tag-row"><span class="tag">${employmentTypeZh(inferEmploymentType(j))}</span><span class="tag">${ruleTrack(j)}</span></div>
-    <label class="job-status-control">状态 <select class="job-status-select" data-job-id="${escapeHtml(String(j.id))}"><option value="Inbox" ${(j.status||'Inbox')==='Inbox'?'selected':''}>待处理</option><option value="Interested" ${j.status==='Interested'?'selected':''}>感兴趣</option><option value="Applied" ${j.status==='Applied'?'selected':''}>已投递</option><option value="NoResponse" ${j.status==='NoResponse'?'selected':''}>未回应</option><option value="Interviewing" ${j.status==='Interviewing'?'selected':''}>面试中</option><option value="NotInterested" ${j.status==='NotInterested'?'selected':''}>不感兴趣</option></select></label>
+    <label class="job-status-control">状态 <select class="job-status-select" data-job-id="${escapeHtml(String(j.id))}"><option value="Inbox" ${(j.status||'Inbox')==='Inbox'?'selected':''}>待处理</option><option value="Interested" ${j.status==='Interested'?'selected':''}>感兴趣</option><option value="Applied" ${j.status==='Applied'?'selected':''}>已投递</option><option value="NoResponse" ${j.status==='NoResponse'?'selected':''}>未回应</option><option value="Interviewing" ${j.status==='Interviewing'?'selected':''}>面试中</option><option value="Rejected" ${j.status==='Rejected'?'selected':''}>失败</option><option value="NotInterested" ${j.status==='NotInterested'?'selected':''}>不感兴趣</option></select></label>
     ${(j.jobDescriptionZh||j.jobDescription) ? `<details class="job-description"><summary>查看职位描述</summary><div class="job-copy" style="white-space:pre-wrap;margin-top:10px">${escapeHtml(j.jobDescriptionZh||j.jobDescription)}</div></details>` : ''}
 
 
@@ -171,7 +171,7 @@ function render(){
   renderStatusCounts();renderPipeline();renderCompTable();renderCalc();
 }
 function renderStatusCounts(){
-  const defs=[['All','全部'],['Inbox','待处理'],['Interested','感兴趣'],['Applied','已投递'],['NoResponse','未回应'],['Interviewing','面试中'],['NotInterested','不感兴趣']];
+  const defs=[['All','全部'],['Inbox','待处理'],['Interested','感兴趣'],['Applied','已投递'],['NoResponse','未回应'],['Interviewing','面试中'],['Rejected','失败'],['NotInterested','不感兴趣']];
   const box=$('#statusFilters'); if(!box)return;
   const current=box.dataset.active||'All';
   box.innerHTML=defs.map(([v,label])=>`<button type="button" class="status-chip ${current===v?'active':''}" data-status="${v}"><span>${label}</span><strong>${v==='All'?jobs.length:jobs.filter(j=>(j.status||'Inbox')===v).length}</strong></button>`).join('');
@@ -182,7 +182,7 @@ async function setJobStatus(id,status){
   const previous=j.status||'Inbox'; j.status=status; save(); render();
   if(cloudConnected){try{const data=await apiFetch('/api/jobs?id='+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({id,status})});if(data.job)Object.assign(j,normalizeJob(data.job));save();render();}catch(e){j.status=previous;save();render();updateConnectionStatus('状态更新失败：'+e.message);}}
 }
-function renderPipeline(){const stages=['Inbox','Interested','Applied','NoResponse','Interviewing','NotInterested'];$('#pipelineBoard').innerHTML=stages.map(stage=>`<div class="pipeline-col"><h3>${statusZh(stage)}</h3>${jobs.filter(j=>(j.status||'Inbox')===stage).map(j=>`<div class="pipeline-card"><b>${j.title}</b><small>${j.company} · ${j.city}</small><small>${rmb(netRmbForJob(j))} 预计税后 / 年</small></div>`).join('')}</div>`).join('')}
+function renderPipeline(){const stages=['Inbox','Interested','Applied','NoResponse','Interviewing','Rejected','NotInterested'];$('#pipelineBoard').innerHTML=stages.map(stage=>`<div class="pipeline-col"><h3>${statusZh(stage)}</h3>${jobs.filter(j=>(j.status||'Inbox')===stage).map(j=>`<div class="pipeline-card"><b>${j.title}</b><small>${j.company} · ${j.city}</small><small>${rmb(netRmbForJob(j))} 预计税后 / 年</small></div>`).join('')}</div>`).join('')}
 function renderCompTable(){const body=$('#compTable tbody');if(!body)return;body.innerHTML=[...jobs].sort((a,b)=>netRmbForJob(b)-netRmbForJob(a)).map(j=>{const gross=totalCashMid(j),n=netLocal(gross,j),nr=n.net*(settings.fx[j.currency]||1);return `<tr><td><b>${j.title}</b><br><small>${j.company}</small></td><td>${j.city}</td><td>${money(gross,j.currency)}</td><td>${money(n.net,j.currency)}</td><td><b>${rmb(nr)}</b></td><td>${rmb(nr/12)}</td><td>${n.label}</td></tr>`}).join('')}
 function renderCalc(){if(!$('#calcCity'))return;const city=$('#calcCity').value||'London',d=CITY_DEFAULTS[city]||{},currency=$('#calcCurrency').value||d.currency||'GBP',base=Number($('#calcSalary').value||0),bonus=Number($('#calcBonus').value||0),gross=base+bonus,j={city,country:d.country||'',currency},n=netLocal(gross,j),nr=n.net*(settings.fx[currency]||1);$('#calcResult').innerHTML=`<div><span>当地税前收入</span><b>${money(gross,currency)}</b></div><div><span>预计当地税后收入</span><b>${money(n.net,currency)}</b></div><div><span>预计税后人民币 / 年</span><b>${rmb(nr)}</b></div><div><span>预计税后人民币 / 月</span><b>${rmb(nr/12)}</b></div>`}
 window.moveStatus=async id=>{const order=['Inbox','Researching','Shortlist','Applied'];const j=jobs.find(x=>String(x.id)===String(id));if(!j)return;j.status=order[(order.indexOf(j.status||'Inbox')+1)%order.length];save();render();if(cloudConnected){try{await apiFetch(`/api/jobs?id=${encodeURIComponent(id)}`,{method:'PATCH',body:JSON.stringify(j)});}catch(e){updateConnectionStatus(`阶段已保存到本地；云端更新失败：${e.message}`)}}};
