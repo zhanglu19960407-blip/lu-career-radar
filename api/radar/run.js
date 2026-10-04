@@ -87,6 +87,9 @@ export default async function handler(req, res) {
       const webJobs = await discoverOfficialJobs({
         maxCompanies: Number(req.body?.maxWebCompanies || 150),
         companyOnly: req.body?.company || null,
+        onCompanyStart: async company => {
+          await supabaseFetch('company_crawl_status?on_conflict=company',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify({company:company.company,tier:company.tier,domains:company.domains,last_status:'running',last_error:null,updated_at:new Date().toISOString()})});
+        },
         batchOnly: req.body?.webBatch === undefined ? null : Number(req.body.webBatch),
         onBatch: async ({batch,totalBatches,companies,jobs}) => {
           const normalized = jobs.map(x=>({ ...x, ...locationMeta(x.location||''), source:x.source||'Official Web Discovery' }))
