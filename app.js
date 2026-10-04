@@ -44,7 +44,12 @@ function renderCrawlCompanies(){
   const body=$('#crawlCompanyList'); if(!body)return;
   const crawled=crawlCompanies.filter(x=>x.lastCrawledAt).length;
   if($('#crawlSummary')) $('#crawlSummary').textContent=`已爬取 ${crawled} / ${crawlCompanies.length} 家 · 未爬取 ${crawlCompanies.length-crawled} 家`;
-  body.innerHTML=crawlCompanies.map(x=>`<tr><td>${x.index}</td><td><strong>${escapeHtml(x.company)}</strong><small>Tier ${x.tier}</small></td><td><span class="crawl-status ${x.lastCrawledAt?'done':'never'}">${x.lastCrawledAt?'已爬取':'未爬取'}</span></td><td>${crawlTime(x.lastCrawledAt)}</td><td>${x.lastCrawledAt?x.lastFoundCount:'—'}</td><td><button class="mini-btn crawl-one-btn" data-company="${escapeHtml(x.company)}" type="button">${x.lastCrawledAt?'重新爬取':'单独爬取'}</button></td></tr>`).join('');
+  const order=['科技与数字平台','金融科技与支付','银行与资产管理','PE、投资与主权基金','咨询与专业服务','消费品、奢侈品与零售','医疗与医药','工业、制造与汽车','能源、资源与大宗商品','物流、航空与出行','中国与亚洲互联网科技','其他'];
+  body.innerHTML=order.map(industry=>{
+    const rows=crawlCompanies.filter(x=>x.industry===industry); if(!rows.length)return '';
+    return `<tr class="crawl-industry-row"><td colspan="6">${escapeHtml(industry)} <strong>${rows.length}</strong></td></tr>`+
+      rows.map(x=>`<tr><td>${x.index}</td><td><strong>${escapeHtml(x.company)}</strong><small>Tier ${x.tier}</small></td><td><span class="crawl-status ${x.lastCrawledAt?'done':'never'}">${x.lastCrawledAt?'已爬取':'未爬取'}</span></td><td>${crawlTime(x.lastCrawledAt)}</td><td>${x.lastCrawledAt?x.lastFoundCount:'—'}</td><td><button class="mini-btn crawl-one-btn" data-company="${escapeHtml(x.company)}" type="button">${x.lastCrawledAt?'重新爬取':'单独爬取'}</button></td></tr>`).join('');
+  }).join('');
 }
 async function loadCrawlCompanies(){try{const data=await apiFetch('/api/company-crawl-status');crawlCompanies=data.companies||[];renderCrawlCompanies();}catch(e){if($('#crawlSummary'))$('#crawlSummary').textContent='读取爬取状态失败：'+e.message;}}
 async function crawlOneCompany(company,btn){
