@@ -86,8 +86,9 @@ export default async function handler(req, res) {
       let batchSaved = 0;
       const webJobs = await discoverOfficialJobs({
         maxCompanies: Number(req.body?.maxWebCompanies || 150),
+        companyOnly: req.body?.company || null,
         batchOnly: req.body?.webBatch === undefined ? null : Number(req.body.webBatch),
-        onBatch: async ({batch,totalBatches,jobs}) => {
+        onBatch: async ({batch,totalBatches,companies,jobs}) => {
           const normalized = jobs.map(x=>({ ...x, ...locationMeta(x.location||''), source:x.source||'Official Web Discovery' }))
             .filter(x=>isRelevantJob(x) && /^https?:\/\//i.test(x.url||''));
           for(const job of normalized){
@@ -98,6 +99,10 @@ export default async function handler(req, res) {
               await supabaseFetch('jobs?on_conflict=fingerprint',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify(db)});
               knownWebUrls.add(job.url); batchSaved++;
             }catch(e){ console.warn('Web batch save failed',batch,job.company,job.title,e.message); }
+          }
+          for(const company of companies){
+            const found=jobs.filter(j=>j.company===company.company).length;
+            await supabaseFetch('company_crawl_status?on_conflict=company',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify({company:company.company,tier:company.tier,domains:company.domains,last_crawled_at:new Date().toISOString(),last_found_count:found,last_status:'success',last_error:null,updated_at:new Date().toISOString()})});
           }
           console.log('Career Radar web batch',JSON.stringify({batch,totalBatches,found:jobs.length,saved:batchSaved}));
         }
