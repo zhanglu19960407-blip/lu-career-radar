@@ -38,6 +38,21 @@ async function apiFetch(path, options={}){
   if(!res.ok) throw new Error(data.error||`请求失败（${res.status}）`);
   return data;
 }
+let crawlCompanies=[];
+function crawlTime(v){if(!v)return '从未';const d=new Date(v);return d.toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function renderCrawlCompanies(){
+  const body=$('#crawlCompanyList'); if(!body)return;
+  const crawled=crawlCompanies.filter(x=>x.lastCrawledAt).length;
+  if($('#crawlSummary')) $('#crawlSummary').textContent=`已爬取 ${crawled} / ${crawlCompanies.length} 家 · 未爬取 ${crawlCompanies.length-crawled} 家`;
+  body.innerHTML=crawlCompanies.map(x=>`<tr><td>${x.index}</td><td><strong>${escapeHtml(x.company)}</strong><small>Tier ${x.tier}</small></td><td><span class="crawl-status ${x.lastCrawledAt?'done':'never'}">${x.lastCrawledAt?'已爬取':'未爬取'}</span></td><td>${crawlTime(x.lastCrawledAt)}</td><td>${x.lastCrawledAt?x.lastFoundCount:'—'}</td><td><button class="mini-btn crawl-one-btn" data-company="${escapeHtml(x.company)}" type="button">${x.lastCrawledAt?'重新爬取':'单独爬取'}</button></td></tr>`).join('');
+}
+async function loadCrawlCompanies(){try{const data=await apiFetch('/api/company-crawl-status');crawlCompanies=data.companies||[];renderCrawlCompanies();}catch(e){if($('#crawlSummary'))$('#crawlSummary').textContent='读取爬取状态失败：'+e.message;}}
+async function crawlOneCompany(company,btn){
+  const old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='爬取中…';}
+  try{await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({company,maxWebCompanies:150})});await loadCloudJobs();await loadCrawlCompanies();}
+  catch(e){alert('单独爬取失败：'+e.message);}
+  finally{if(btn){btn.disabled=false;btn.textContent=old||'单独爬取';}}
+}
 async function loadCloudJobs(){
   try{
     const data=await apiFetch('/api/jobs');
@@ -197,6 +212,9 @@ function renderSettings(){
 }
 function wireNav(){ $$('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{$$('.nav-item').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$$('.view').forEach(x=>x.classList.remove('active-view'));$('#'+btn.dataset.view+'View').classList.add('active-view');if(btn.dataset.view==='settings')renderSettings();if(btn.dataset.view==='compensation'){renderCompTable();renderCalc()}})) }
 wireNav();
+$('#crawlCompanyList')?.addEventListener('click',e=>{const btn=e.target.closest?.('.crawl-one-btn');if(btn)crawlOneCompany(btn.dataset.company,btn);});
+$('#refreshCrawlStatusBtn')?.addEventListener('click',loadCrawlCompanies);
+loadCrawlCompanies();
 $('#jobGrid')?.addEventListener('change',e=>{const el=e.target.closest?.('.job-status-select');if(el)setJobStatus(el.dataset.jobId,el.value);});
 ['change','input'].forEach(evt=>document.querySelectorAll('.track-filter,.geo-filter,#locationSelect,#employmentTypeSelect,#sortSelect,#searchInput').forEach(el=>el.addEventListener(evt,render)));
 ['change','input'].forEach(evt=>['#calcCity','#calcCurrency','#calcSalary','#calcBonus'].forEach(sel=>$(sel)?.addEventListener(evt,()=>{if(sel==='#calcCity'){const d=CITY_DEFAULTS[$('#calcCity').value];if(d)$('#calcCurrency').value=d.currency}renderCalc()})));
