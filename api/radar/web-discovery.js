@@ -46,7 +46,10 @@ ${WEB_DISCOVERY_MARKETS.join(', ')}
 TARGET ROLE THEMES:
 ${WEB_DISCOVERY_TERMS.join(', ')}
 
-Return at most 100 strong matches. Every result MUST be a currently open individual job posting, not a search page, company careers homepage, LinkedIn page, aggregator, cached page, or expired posting. The url MUST point to an allowed official company domain above. Only return roles whose job title matches the TARGET ROLE THEMES. Do not broaden to generic finance, accounting, analyst, business operations, GM-track, or MBA roles.
+DISCOVERY EXPANSION:
+Also use public-web discovery patterns similar to the user's job search intent: Senior Finance Manager, Finance Manager, Finance Business Partner, Financial Planning & Analysis Manager / FP&A Manager, MBA Summer Intern, MBA Intern, MBA Internship, and MBA Summer Associate. On-site and hybrid roles are both acceptable. This is discovery only: never return LinkedIn URLs or job aggregators; verify each result against the employer's official career/ATS domain above.
+
+Return at most 100 strong matches. Every result MUST be a currently open individual job posting, not a search page, company careers homepage, LinkedIn page, aggregator, cached page, or expired posting. The url MUST point to an allowed official company domain above. Only return roles whose job title matches the TARGET ROLE THEMES. Do not broaden to generic finance, accounting, analyst, business operations, or GM-track roles. MBA roles are allowed only when the title explicitly indicates MBA internship/program intent.
 
 Return ONLY valid JSON with this shape:
 {"jobs":[{"company":"","title":"","location":"","industry":"","url":"","jobDescription":""}]}
