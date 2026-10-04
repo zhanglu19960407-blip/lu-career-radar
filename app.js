@@ -54,7 +54,7 @@ function renderCrawlCompanies(){
 async function loadCrawlCompanies(){try{const data=await apiFetch('/api/company-crawl-status');crawlCompanies=data.companies||[];renderCrawlCompanies();}catch(e){if($('#crawlSummary'))$('#crawlSummary').textContent='读取爬取状态失败：'+e.message;}}
 async function crawlOneCompany(company,btn){
   const old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='爬取中…';}
-  try{await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({company,maxWebCompanies:150})});await loadCloudJobs();await loadCrawlCompanies();}
+  try{await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({company,maxWebCompanies:200})});await loadCloudJobs();await loadCrawlCompanies();}
   catch(e){alert('单独爬取失败：'+e.message);}
   finally{if(btn){btn.disabled=false;btn.textContent=old||'单独爬取';}}
 }
@@ -233,9 +233,9 @@ $('#runRadarBtn')?.addEventListener('click',async e=>{
     let discoveredTotal=0, newTotal=0;
     // Run each official-web batch as an independent request so no single Vercel
     // function has to scan the whole company universe within its time limit.
-    for(let webBatch=0;webBatch<7;webBatch++){
+    for(let webBatch=0;webBatch<40;webBatch++){
       btn.textContent=`正在抓取职位… ${webBatch+1}/7`;
-      const data=await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({maxWebCompanies:150,webBatch})});
+      const data=await apiFetch('/api/radar/run',{method:'POST',body:JSON.stringify({maxWebCompanies:200,webBatch})});
       discoveredTotal+=Number(data.discovered||0);
       newTotal+=Number(data.newCandidates||0);
     }
