@@ -13,7 +13,7 @@ jobs:
         env:
           RADAR_ACCESS_TOKEN: ${{ secrets.RADAR_ACCESS_TOKEN }}
         run: |
-          for batch in 0 1 2 3 4 5 6; do
+          for batch in $(seq 0 39); do
             curl --fail-with-body --retry 2 --max-time 300 \
               -X POST "https://lu-career-radar.vercel.app/api/radar/run" \
               -H "Content-Type: application/json" \
