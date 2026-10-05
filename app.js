@@ -158,10 +158,17 @@ function filteredJobs(){
   const tracks=new Set($$('.track-filter:checked').map(x=>x.value));
   const geos=new Set($$('.geo-filter:checked').map(x=>x.value));
   const q=$('#searchInput')?.value?.toLowerCase().trim()||'', loc=$('#locationSelect')?.value||'All', employment=$('#employmentTypeSelect')?.value||'All';
-  let list=jobs;
-  // diagnostic mode: no search filtering
-  // diagnostic mode: no location filtering
-  // diagnostic mode: no employment filtering
+  let list=[...jobs];
+  const geoBucket=j=>{
+    const text=((j.city||'')+' '+(j.country||'')+' '+(j.geography||'')).toLowerCase();
+    if(/hong kong|香港/.test(text)) return 'Hong Kong';
+    if(/singapore|新加坡/.test(text)) return 'Singapore';
+    if(/united kingdom|\buk\b|england|london|oxford|cambridge|英国/.test(text)) return 'UK';
+    if(/china|mainland|beijing|shanghai|shenzhen|guangzhou|中国|北京|上海|深圳|广州/.test(text)) return 'Mainland China';
+    if(/united arab emirates|\buae\b|dubai|abu dhabi|saudi|riyadh|qatar|doha|bahrain|kuwait|oman|middle east|中东|迪拜|利雅得/.test(text)) return 'Middle East';
+    return null;
+  };
+  list=list.filter(j=>tracks.has(ruleTrack(j)) && geos.has(geoBucket(j)));
   const sort=$('#sortSelect')?.value||'fit';
   const trackOrder={'CFO':0,'Operating Partner':1};
   list.sort((a,b)=>(trackOrder[ruleTrack(a)]??9)-(trackOrder[ruleTrack(b)]??9)||(sort==='career'?b.careerUpside-a.careerUpside:sort==='pl'?b.plExposure-a.plExposure:sort==='gross'?totalCashMid(b)*(settings.fx[b.currency]||1)-totalCashMid(a)*(settings.fx[a.currency]||1):sort==='netRmb'?netRmbForJob(b)-netRmbForJob(a):b.fitScore-a.fitScore));
@@ -170,7 +177,7 @@ function filteredJobs(){
 function render(){
   refreshLocationOptions();
   const activeStatus=$('#statusFilters')?.dataset.active||'All';
-  const list=[...jobs].filter(j=>activeStatus==='All'||(j.status||'Inbox')===activeStatus);
+  const list=filteredJobs().filter(j=>activeStatus==='All'||(j.status||'Inbox')===activeStatus);
   if($('#jobCount')) $('#jobCount').textContent=list.length;
   const trackLabels={'CFO':'CFO 导向','Operating Partner':'PE 价值创造导向'};
   const trackOrder=['CFO','Operating Partner'];
